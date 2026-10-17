@@ -15,17 +15,13 @@ html,body{
   user-select:none;-webkit-user-select:none;
 }
 
-canvas{
-  display:block;width:100vw;height:100dvh;
-  touch-action:none;
-}
+canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 
 #top{
   position:fixed;top:0;left:0;right:0;
   padding:12px 16px;display:flex;
   justify-content:space-between;z-index:10;
-  font-weight:bold;
-  text-shadow:0 0 10px #00e5ff;
+  font-weight:bold;text-shadow:0 0 10px #00e5ff;
 }
 
 #score{color:#00e5ff;font-size:22px}
@@ -46,8 +42,7 @@ canvas{
 }
 
 #start h1{
-  font-size:42px;margin:0;
-  color:#00e5ff;
+  font-size:42px;margin:0;color:#00e5ff;
   text-shadow:0 0 25px #00e5ff,0 0 60px #0077ff;
 }
 
@@ -84,21 +79,27 @@ canvas{
 
 #controls{
   position:fixed;bottom:0;left:0;right:0;
-  height:150px;display:none;
+  height:200px;display:none;
   justify-content:space-evenly;align-items:center;
-  z-index:20;background:linear-gradient(180deg,transparent,#01050bcc);
+  z-index:20;padding-bottom:22px;
+  background:linear-gradient(180deg,transparent,#01050bcc);
 }
 
 .cbtn{
-  width:92px;height:92px;border-radius:50%;
-  font-size:38px;font-weight:bold;color:#fff;
+  width:140px;height:140px;border-radius:50%;
+  font-size:58px;font-weight:bold;color:#fff;
   background:linear-gradient(180deg,#123a5c,#081c2f);
-  border:2px solid #2f6d94;
-  box-shadow:0 0 20px #00e5ff44;
+  border:3px solid #2f6d94;
+  box-shadow:0 0 30px #00e5ff55;
   touch-action:none;user-select:none;
+  -webkit-user-select:none;
 }
 
-.cbtn:active{background:#0a7f9d;border-color:#7ff4ff}
+.cbtn:active{
+  background:linear-gradient(180deg,#0a9dbf,#066b85);
+  border-color:#7ff4ff;
+  transform:scale(0.95);
+}
 </style>
 </head>
 
@@ -156,9 +157,6 @@ addEventListener("resize", resize);
 resize();
 
 let playing = false;
-let gameOver = false;
-
-let roadX = 0;
 let playerX = 0;
 let speed = 0;
 let distance = 0;
@@ -170,7 +168,6 @@ let stars = [];
 let lines = [];
 
 const maxSpeed = 24;
-const roadWidth = 900;
 
 for(let i=0;i<90;i++){
   stars.push({
@@ -184,8 +181,98 @@ for(let i=0;i<40;i++){
   lines.push(i / 40);
 }
 
+/* ---------- SOUND SYSTEM ---------- */
+
+let audioCtx = null;
+let engineOsc = null;
+let engineGain = null;
+let engineFilter = null;
+
+function startAudio(){
+  if(audioCtx) return;
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  engineOsc = audioCtx.createOscillator();
+  engineOsc.type = "sawtooth";
+  engineOsc.frequency.value = 60;
+
+  engineFilter = audioCtx.createBiquadFilter();
+  engineFilter.type = "lowpass";
+  engineFilter.frequency.value = 500;
+
+  engineGain = audioCtx.createGain();
+  engineGain.gain.value = 0.0001;
+
+  engineOsc.connect(engineFilter);
+  engineFilter.connect(engineGain);
+  engineGain.connect(audioCtx.destination);
+
+  engineOsc.start();
+}
+
+function updateEngineSound(){
+  if(!audioCtx || !playing) return;
+
+  const freq = 55 + speed * 9;
+  const volume = 0.03 + speed / maxSpeed * 0.07;
+
+  engineOsc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.08);
+  engineGain.gain.setTargetAtTime(volume, audioCtx.currentTime, 0.1);
+}
+
+function stopEngineSound(){
+  if(!audioCtx || !engineGain) return;
+  engineGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.1);
+}
+
+function crashSound(){
+  if(!audioCtx) return;
+
+  const bufferSize = audioCtx.sampleRate * 0.6;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  for(let i=0;i<bufferSize;i++){
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+  }
+
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = 900;
+
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0.55;
+
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  noise.start();
+
+  const boom = audioCtx.createOscillator();
+  const boomGain = audioCtx.createGain();
+
+  boom.type = "sine";
+  boom.frequency.setValueAtTime(120, audioCtx.currentTime);
+  boom.frequency.exponentialRampToValueAtTime(35, audioCtx.currentTime + 0.5);
+
+  boomGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+  boomGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+
+  boom.connect(boomGain);
+  boomGain.connect(audioCtx.destination);
+
+  boom.start();
+  boom.stop(audioCtx.currentTime + 0.6);
+}
+
+/* ---------- GAME ---------- */
+
 function reset(){
-  roadX = 0;
   playerX = 0;
   speed = 0;
   distance = 0;
@@ -206,9 +293,14 @@ function addObstacle(z){
 }
 
 function startGame(){
+  startAudio();
+
+  if(audioCtx && audioCtx.state === "suspended"){
+    audioCtx.resume();
+  }
+
   reset();
   playing = true;
-  gameOver = false;
 
   document.getElementById("start").style.display = "none";
   document.getElementById("over").style.display = "none";
@@ -217,7 +309,8 @@ function startGame(){
 
 function crash(){
   playing = false;
-  gameOver = true;
+  stopEngineSound();
+  crashSound();
 
   if(score > best){
     best = score;
@@ -237,15 +330,12 @@ document.getElementById("again").addEventListener("click", startGame);
 let leftPressed = false;
 let rightPressed = false;
 
-const leftBtn = document.getElementById("left");
-const rightBtn = document.getElementById("right");
-
-leftBtn.addEventListener("pointerdown", e => {
+document.getElementById("left").addEventListener("pointerdown", e => {
   e.preventDefault();
   leftPressed = true;
 });
 
-rightBtn.addEventListener("pointerdown", e => {
+document.getElementById("right").addEventListener("pointerdown", e => {
   e.preventDefault();
   rightPressed = true;
 });
@@ -281,8 +371,10 @@ function update(){
   distance += speed;
   score = Math.floor(distance / 12);
 
-  if(leftPressed) playerX -= 9;
-  if(rightPressed) playerX += 9;
+  updateEngineSound();
+
+  if(leftPressed) playerX -= 10;
+  if(rightPressed) playerX += 10;
 
   if(playerX < -320) playerX = -320;
   if(playerX > 320) playerX = 320;
@@ -291,7 +383,7 @@ function update(){
     o.z -= speed * 9;
 
     if(o.z < 100){
-      if(Math.abs(o.lane * 260 - playerX) < 105){
+      if(Math.abs(o.lane * 260 - playerX) < 110){
         crash();
       }
 
@@ -336,12 +428,7 @@ function drawBackground(){
   ctx.fillStyle = "#02040a";
 
   for(let i=0;i<8;i++){
-    ctx.fillRect(
-      W/2-120,
-      sunY - 100 + i*22,
-      240,
-      7
-    );
+    ctx.fillRect(W/2-120,sunY-100+i*22,240,7);
   }
 }
 
@@ -370,7 +457,7 @@ function drawRoad(){
 
   ctx.fillStyle = "#f7e58a";
 
-  lines.forEach((l,i) => {
+  lines.forEach(l => {
     let z = ((l * 2000 + distance * 8) % 2000);
     let scale = 700 / z;
     let y = horizon + (H - horizon) * scale * 0.8;
@@ -422,7 +509,7 @@ function drawObstacles(){
 
 function drawPlayer(){
   const x = W/2 + playerX;
-  const y = H - 120;
+  const y = H - 150;
 
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.beginPath();
