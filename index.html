@@ -27,10 +27,35 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 #score{color:#00e5ff;font-size:22px}
 #best{color:#ffd166;font-size:15px;text-align:right}
 
-#speed{
+#speedBox{
   position:fixed;top:64px;left:16px;z-index:10;
-  font-size:14px;color:#9ff;font-weight:bold;
-  text-shadow:0 0 8px #00e5ff;
+  background:#04121ecc;
+  border:1px solid #1d4a68;
+  border-radius:14px;
+  padding:10px 14px;
+}
+
+#speedText{
+  font-size:26px;font-weight:900;color:#7ff4ff;
+  text-shadow:0 0 14px #00e5ff;
+}
+
+#speedLabel{
+  font-size:11px;color:#9db4c9;margin-top:3px;
+}
+
+#boostBar{
+  width:150px;height:10px;
+  background:#0b2233;
+  border-radius:20px;
+  margin-top:8px;
+  overflow:hidden;
+}
+
+#boostFill{
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg,#ffd166,#ff7ad9);
 }
 
 #start{
@@ -48,7 +73,7 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 
 #start p{
   color:#b9d6e8;font-size:15px;line-height:1.6;
-  max-width:330px;
+  max-width:340px;
 }
 
 #play{
@@ -59,35 +84,17 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
   box-shadow:0 0 30px #00e5ff88;
 }
 
-#over{
-  position:fixed;inset:0;z-index:30;display:none;
-  background:#02040ae8;
-  flex-direction:column;justify-content:center;
-  align-items:center;text-align:center;
-}
-
-#over h1{color:#ff4d6d;font-size:38px;text-shadow:0 0 25px #ff4d6d}
-#over p{font-size:18px;color:#d8f6ff}
-
-#again{
-  margin-top:22px;padding:14px 38px;
-  font-size:18px;font-weight:900;color:#021018;
-  background:linear-gradient(90deg,#ffd166,#ff8fa3);
-  border:none;border-radius:40px;
-  box-shadow:0 0 25px #ffd16677;
-}
-
 #controls{
   position:fixed;bottom:0;left:0;right:0;
-  height:200px;display:none;
+  height:210px;display:flex;
   justify-content:space-evenly;align-items:center;
-  z-index:20;padding-bottom:22px;
+  z-index:20;padding-bottom:24px;
   background:linear-gradient(180deg,transparent,#01050bcc);
 }
 
 .cbtn{
-  width:140px;height:140px;border-radius:50%;
-  font-size:58px;font-weight:bold;color:#fff;
+  width:150px;height:150px;border-radius:50%;
+  font-size:62px;font-weight:bold;color:#fff;
   background:linear-gradient(180deg,#123a5c,#081c2f);
   border:3px solid #2f6d94;
   box-shadow:0 0 30px #00e5ff55;
@@ -100,36 +107,49 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
   border-color:#7ff4ff;
   transform:scale(0.95);
 }
+
+#boost{
+  width:170px;height:170px;
+  font-size:24px;line-height:1.2;
+  background:linear-gradient(180deg,#7b52c4,#3b2270);
+  border-color:#c9a4ff;
+  box-shadow:0 0 35px #7b52c477;
+}
+
+#boost:active{
+  background:linear-gradient(180deg,#a86bff,#5b2fa8);
+  border-color:#e6c8ff;
+}
 </style>
 </head>
 
 <body>
 
 <div id="top">
-  <div id="score">SCORE 0</div>
-  <div id="best">BEST 0</div>
+  <div id="score">DISTANCE 0 M</div>
+  <div id="best">BEST SPEED 0</div>
 </div>
 
-<div id="speed">SPEED 0 KM/H</div>
+<div id="speedBox">
+  <div id="speedText">0 KM/H</div>
+  <div id="speedLabel">CURRENT SPEED</div>
+  <div id="boostBar"><div id="boostFill"></div></div>
+</div>
 
 <div id="start">
   <h1>NEON DRIFT 3D</h1>
   <p>
-    सुरुवातीला गाडी हळू चालेल.<br>
-    नंतर स्पीड वाढेल आणि रहदारीही जास्त होईल.<br>
-    टक्कर टाळून जास्त score करा!
+    रस्त्यावर अडथळे नाहीत.<br>
+    गाडी सुरुवातीला हळू चालेल,<br>
+    नंतर हळूहळू अधिक वेगवान होईल.<br>
+    BOOST दाबून जास्त स्पीड काढा!
   </p>
-  <button id="play">START RACE</button>
-</div>
-
-<div id="over">
-  <h1>CRASHED!</h1>
-  <p id="finalScore">SCORE 0</p>
-  <button id="again">PLAY AGAIN</button>
+  <button id="play">START ENGINE</button>
 </div>
 
 <div id="controls">
   <button class="cbtn" id="left">◀</button>
+  <button class="cbtn" id="boost">🔥<br>BOOST</button>
   <button class="cbtn" id="right">▶</button>
 </div>
 
@@ -160,16 +180,18 @@ let playing = false;
 let playerX = 0;
 let speed = 0;
 let distance = 0;
-let score = 0;
-let best = Number(localStorage.getItem("neonBest") || 0);
+let bestSpeed = Number(localStorage.getItem("neonBestSpeed") || 0);
 
-let obstacles = [];
 let stars = [];
 let lines = [];
 
-const maxSpeed = 26;
+const normalMaxSpeed = 18;
+const boostMaxSpeed = 34;
 
-for(let i=0;i<90;i++){
+let boostPower = 100;
+let boosting = false;
+
+for(let i=0;i<100;i++){
   stars.push({
     x: Math.random(),
     y: Math.random() * 0.55,
@@ -177,8 +199,8 @@ for(let i=0;i<90;i++){
   });
 }
 
-for(let i=0;i<40;i++){
-  lines.push(i / 40);
+for(let i=0;i<45;i++){
+  lines.push(i / 45);
 }
 
 /* ---------- SOUND ---------- */
@@ -195,11 +217,11 @@ function startAudio(){
 
   engineOsc = audioCtx.createOscillator();
   engineOsc.type = "sawtooth";
-  engineOsc.frequency.value = 50;
+  engineOsc.frequency.value = 45;
 
   engineFilter = audioCtx.createBiquadFilter();
   engineFilter.type = "lowpass";
-  engineFilter.frequency.value = 500;
+  engineFilter.frequency.value = 600;
 
   engineGain = audioCtx.createGain();
   engineGain.gain.value = 0.0001;
@@ -214,8 +236,8 @@ function startAudio(){
 function updateEngineSound(){
   if(!audioCtx || !playing) return;
 
-  const freq = 45 + speed * 8;
-  const volume = 0.025 + (speed / maxSpeed) * 0.07;
+  const freq = 42 + speed * 7;
+  const volume = 0.02 + (speed / boostMaxSpeed) * 0.08;
 
   engineOsc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
   engineGain.gain.setTargetAtTime(volume, audioCtx.currentTime, 0.12);
@@ -226,70 +248,7 @@ function stopEngineSound(){
   engineGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.1);
 }
 
-function crashSound(){
-  if(!audioCtx) return;
-
-  const bufferSize = audioCtx.sampleRate * 0.6;
-  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const data = buffer.getChannelData(0);
-
-  for(let i=0;i<bufferSize;i++){
-    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
-  }
-
-  const noise = audioCtx.createBufferSource();
-  noise.buffer = buffer;
-
-  const filter = audioCtx.createBiquadFilter();
-  filter.type = "lowpass";
-  filter.frequency.value = 900;
-
-  const gain = audioCtx.createGain();
-  gain.gain.value = 0.55;
-
-  noise.connect(filter);
-  filter.connect(gain);
-  gain.connect(audioCtx.destination);
-  noise.start();
-
-  const boom = audioCtx.createOscillator();
-  const boomGain = audioCtx.createGain();
-
-  boom.type = "sine";
-  boom.frequency.setValueAtTime(120, audioCtx.currentTime);
-  boom.frequency.exponentialRampToValueAtTime(35, audioCtx.currentTime + 0.5);
-
-  boomGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
-  boomGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
-
-  boom.connect(boomGain);
-  boomGain.connect(audioCtx.destination);
-
-  boom.start();
-  boom.stop(audioCtx.currentTime + 0.6);
-}
-
 /* ---------- GAME ---------- */
-
-function reset(){
-  playerX = 0;
-  speed = 0;
-  distance = 0;
-  score = 0;
-  obstacles = [];
-
-  // सुरुवातीला फक्त 2 अडथळे
-  addObstacle(1400);
-  addObstacle(2200);
-}
-
-function addObstacle(z){
-  obstacles.push({
-    z: z,
-    lane: Math.floor(Math.random() * 3) - 1,
-    color: ["#ff4d6d","#ffd166","#8f6bff","#41ffb0"][Math.floor(Math.random()*4)]
-  });
-}
 
 function startGame(){
   startAudio();
@@ -298,33 +257,18 @@ function startGame(){
     audioCtx.resume();
   }
 
-  reset();
+  playerX = 0;
+  speed = 0;
+  distance = 0;
+  boostPower = 100;
+  boosting = false;
   playing = true;
 
   document.getElementById("start").style.display = "none";
-  document.getElementById("over").style.display = "none";
   document.getElementById("controls").style.display = "flex";
 }
 
-function crash(){
-  playing = false;
-  stopEngineSound();
-  crashSound();
-
-  if(score > best){
-    best = score;
-    localStorage.setItem("neonBest", best);
-  }
-
-  document.getElementById("finalScore").textContent =
-    "SCORE " + score + " · BEST " + best;
-
-  document.getElementById("over").style.display = "flex";
-  document.getElementById("controls").style.display = "none";
-}
-
 document.getElementById("play").addEventListener("click", startGame);
-document.getElementById("again").addEventListener("click", startGame);
 
 let leftPressed = false;
 let rightPressed = false;
@@ -339,79 +283,101 @@ document.getElementById("right").addEventListener("pointerdown", e => {
   rightPressed = true;
 });
 
+document.getElementById("boost").addEventListener("pointerdown", e => {
+  e.preventDefault();
+
+  if(boostPower > 5){
+    boosting = true;
+  }
+});
+
 addEventListener("pointerup", () => {
   leftPressed = false;
   rightPressed = false;
+  boosting = false;
 });
 
 addEventListener("pointercancel", () => {
   leftPressed = false;
   rightPressed = false;
+  boosting = false;
 });
 
 addEventListener("keydown", e => {
   if(e.key === "ArrowLeft" || e.key === "a") leftPressed = true;
   if(e.key === "ArrowRight" || e.key === "d") rightPressed = true;
+  if(e.key === " ") boosting = true;
 });
 
 addEventListener("keyup", e => {
   if(e.key === "ArrowLeft" || e.key === "a") leftPressed = false;
   if(e.key === "ArrowRight" || e.key === "d") rightPressed = false;
+  if(e.key === " ") boosting = false;
 });
 
 document.addEventListener("contextmenu", e => e.preventDefault());
 
 function getAcceleration(){
-  // सुरुवातीला खूप हळू, नंतर जास्त वेगाने वाढणार
-  if(speed < 6) return 0.018;
-  if(speed < 12) return 0.035;
-  if(speed < 18) return 0.055;
-  return 0.075;
-}
-
-function getObstacleGap(){
-  // सुरुवातीला अडथळे दूर, नंतर जवळ येतील
-  if(score < 100) return 2200;
-  if(score < 250) return 1700;
-  if(score < 500) return 1300;
-  if(score < 900) return 1000;
-  return 800;
+  // सुरुवातीला अतिशय हळू, नंतर हळूहळू जास्त
+  if(speed < 4) return 0.008;
+  if(speed < 8) return 0.016;
+  if(speed < 12) return 0.028;
+  if(speed < 16) return 0.042;
+  return 0.055;
 }
 
 function update(){
   if(!playing) return;
 
-  speed += getAcceleration();
-  if(speed > maxSpeed) speed = maxSpeed;
+  let maxSpeed = boosting ? boostMaxSpeed : normalMaxSpeed;
+
+  if(boosting && boostPower > 0){
+    speed += 0.16;
+    boostPower -= 0.45;
+
+    if(boostPower <= 0){
+      boostPower = 0;
+      boosting = false;
+    }
+  }else{
+    speed += getAcceleration();
+
+    if(speed > normalMaxSpeed){
+      speed -= 0.06;
+    }
+
+    if(boostPower < 100){
+      boostPower += 0.12;
+    }
+  }
+
+  if(speed > maxSpeed){
+    speed = maxSpeed;
+  }
 
   distance += speed;
-  score = Math.floor(distance / 12);
+  playerX += (rightPressed ? 7 : 0) - (leftPressed ? 7 : 0);
+
+  if(playerX < -300) playerX = -300;
+  if(playerX > 300) playerX = 300;
+
+  if(speed > bestSpeed){
+    bestSpeed = speed;
+    localStorage.setItem("neonBestSpeed", Math.floor(bestSpeed * 14));
+  }
 
   updateEngineSound();
 
-  if(leftPressed) playerX -= 10;
-  if(rightPressed) playerX += 10;
+  document.getElementById("score").textContent =
+    "DISTANCE " + Math.floor(distance) + " M";
 
-  if(playerX < -320) playerX = -320;
-  if(playerX > 320) playerX = 320;
+  document.getElementById("best").textContent =
+    "BEST SPEED " + Math.floor(bestSpeed * 14);
 
-  obstacles.forEach(o => {
-    o.z -= speed * 9;
+  document.getElementById("speedText").textContent =
+    Math.floor(speed * 14) + " KM/H";
 
-    if(o.z < 100){
-      if(Math.abs(o.lane * 260 - playerX) < 110){
-        crash();
-      }
-
-      o.z = getObstacleGap() + Math.random() * 500;
-      o.lane = Math.floor(Math.random() * 3) - 1;
-    }
-  });
-
-  document.getElementById("score").textContent = "SCORE " + score;
-  document.getElementById("best").textContent = "BEST " + best;
-  document.getElementById("speed").textContent =
-    "SPEED " + Math.floor(speed * 14) + " KM/H";
+  document.getElementById("boostFill").style.width = boostPower + "%";
 }
 
 function drawBackground(){
@@ -488,53 +454,25 @@ function drawRoad(){
   });
 
   ctx.globalAlpha = 1;
-}
 
-function drawObstacles(){
-  const horizon = H * 0.55;
-
-  obstacles
-    .slice()
-    .sort((a,b) => b.z - a.z)
-    .forEach(o => {
-
-      if(o.z < 80) return;
-
-      let scale = 700 / o.z;
-      let y = horizon + (H - horizon) * scale * 0.8;
-      let x = W/2 + o.lane * 260 * scale;
-      let w = 150 * scale;
-      let h = 90 * scale;
-
-      if(y > H || w < 4) return;
-
-      ctx.fillStyle = "rgba(0,0,0,0.55)";
-      ctx.fillRect(x - w/2 + 6, y - h + 10, w, h);
-
-      ctx.fillStyle = o.color;
-      ctx.shadowColor = o.color;
-      ctx.shadowBlur = 25;
-
-      ctx.fillRect(x - w/2, y - h, w, h);
-      ctx.shadowBlur = 0;
-
-      ctx.fillStyle = "#fff8c9";
-      ctx.fillRect(x - w/2 + w*0.1, y - h + h*0.25, w*0.8, h*0.3);
-    });
+  if(boosting){
+    ctx.fillStyle = "rgba(255,122,217,0.18)";
+    ctx.fillRect(0,horizon,W,H-horizon);
+  }
 }
 
 function drawPlayer(){
   const x = W/2 + playerX;
-  const y = H - 150;
+  const y = H - 170;
 
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.beginPath();
   ctx.ellipse(x,y+55,70,16,0,0,Math.PI*2);
   ctx.fill();
 
-  ctx.fillStyle = "#00e5ff";
-  ctx.shadowColor = "#00e5ff";
-  ctx.shadowBlur = 35;
+  ctx.fillStyle = boosting ? "#ff7ad9" : "#00e5ff";
+  ctx.shadowColor = boosting ? "#ff7ad9" : "#00e5ff";
+  ctx.shadowBlur = 40;
 
   ctx.beginPath();
   ctx.moveTo(x-70,y+40);
@@ -561,9 +499,18 @@ function drawPlayer(){
 
   ctx.shadowBlur = 0;
 
-  ctx.fillStyle = "#ff2e88";
+  ctx.fillStyle = boosting ? "#ffd166" : "#ff2e88";
   ctx.fillRect(x-62,y+38,20,7);
   ctx.fillRect(x+42,y+38,20,7);
+
+  if(boosting){
+    ctx.fillStyle = "#ff7ad9";
+    ctx.shadowColor = "#ff7ad9";
+    ctx.shadowBlur = 30;
+
+    ctx.fillRect(x-25,y+48,50,18);
+    ctx.shadowBlur = 0;
+  }
 }
 
 function draw(){
@@ -571,7 +518,6 @@ function draw(){
 
   drawBackground();
   drawRoad();
-  drawObstacles();
   drawPlayer();
 
   requestAnimationFrame(draw);
