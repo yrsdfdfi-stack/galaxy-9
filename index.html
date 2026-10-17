@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZORQUINT Game</title>
+<style>
+body{margin:0;background:#10152b;color:white;font-family:Arial;text-align:center}
+h1{color:#55e6ff}
+#game{max-width:420px;margin:20px auto;padding:20px}
+button{font-size:20px;padding:14px 22px;margin:8px;border:0;border-radius:12px;background:#55e6ff;color:#10152b;font-weight:bold}
+#coin{font-size:75px;margin:25px}
+</style>
+</head>
+<body>
+<div id="game">
+<h1>ZORQUINT</h1>
+<h2>Coin Clicker Game</h2>
+<p>Tap the coin to score points!</p>
+<div id="coin" onclick="score++ ; update()">🪙</div>
+<h2>Score: <span id="score">0</span></h2>
+<button onclick="score++;update()">TAP TO EARN</button>
+<button onclick="score=0;update()">RESTART</button>
+</div>
+<script>
+let score=0;
+function update(){document.getElementById('score').textContent=score;}
+</script>
+</body>
+</html>
