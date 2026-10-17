@@ -3,535 +3,402 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>ZOMBIE HUNTER 3D</title>
+<title>BOMB STRIKE 3D</title>
 
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
 html,body{
   margin:0;padding:0;width:100%;height:100%;
-  overflow:hidden;background:#000;color:#fff;
+  overflow:hidden;background:#02040a;color:#fff;
   font-family:Arial,sans-serif;touch-action:none;
   user-select:none;-webkit-user-select:none;
 }
 
 canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 
-#hud{
-  position:fixed;top:10px;left:12px;z-index:10;
-  background:#04121ecc;border:1px solid #1d4a68;
-  border-radius:14px;padding:10px 14px;
+#top{
+  position:fixed;top:0;left:0;right:0;
+  padding:10px 14px;display:flex;
+  justify-content:space-between;z-index:10;
+  font-weight:bold;
 }
 
-#healthBar{
-  width:170px;height:12px;background:#251018;
-  border-radius:20px;overflow:hidden;margin-top:6px;
+#score{color:#ffd166;font-size:20px}
+#ammo{color:#00e5ff;font-size:14px;text-align:right}
+
+#weapons{
+  position:fixed;bottom:0;left:0;right:0;
+  height:150px;display:flex;
+  justify-content:space-evenly;align-items:center;
+  z-index:20;padding-bottom:20px;
+  background:linear-gradient(180deg,transparent,#01050bd9);
 }
 
-#healthFill{
-  height:100%;width:100%;
-  background:linear-gradient(90deg,#ff4d6d,#ff8fa3);
+.wbtn{
+  width:105px;height:105px;border-radius:20px;
+  font-size:14px;font-weight:900;color:#fff;
+  background:linear-gradient(180deg,#1d3a56,#0f2237);
+  border:3px solid #2f6d94;
+  box-shadow:0 0 20px #00e5ff44;
+  touch-action:none;user-select:none;
 }
 
-#hudText{font-size:14px;font-weight:bold}
-
-#kills{
-  position:fixed;top:10px;right:12px;z-index:10;
-  background:#04121ecc;border:1px solid #1d4a68;
-  border-radius:14px;padding:10px 14px;
-  font-size:16px;font-weight:bold;color:#7cff5f;
+.wbtn.active{
+  background:linear-gradient(180deg,#0a9dbf,#066b85);
+  border-color:#7ff4ff;
+  transform:scale(1.05);
 }
+
+#drop{
+  width:130px;height:130px;border-radius:50%;
+  font-size:20px;font-weight:900;color:#fff;
+  background:radial-gradient(circle at 30% 30%,#ff6b81,#a3122c);
+  border:4px solid #ffb3c1;
+  box-shadow:0 0 30px #ff4d6d88;
+}
+
+#drop:active{transform:scale(0.94)}
 
 #start{
   position:fixed;inset:0;z-index:30;
-  background:radial-gradient(circle at center,#0b1d33,#000);
+  background:radial-gradient(circle at center,#0b1d33,#02040a);
   display:flex;flex-direction:column;
   justify-content:center;align-items:center;
   text-align:center;padding:24px;
 }
 
 #start h1{
-  font-size:38px;margin:0;color:#7cff5f;
-  text-shadow:0 0 25px #7cff5f;
+  font-size:38px;margin:0;color:#ffd166;
+  text-shadow:0 0 25px #ffd166;
 }
 
 #start p{
-  color:#b9d6e8;font-size:15px;line-height:1.6;
+  color:#b9d6e8;font-size:15px;line-height:1.7;
   max-width:340px;
 }
 
 #play{
   margin-top:24px;padding:16px 44px;
   font-size:20px;font-weight:900;color:#021018;
-  background:linear-gradient(90deg,#7cff5f,#00e5ff);
-  border:none;border-radius:40px;
-  box-shadow:0 0 30px #7cff5f88;
-}
-
-#over{
-  position:fixed;inset:0;z-index:30;display:none;
-  background:#000000e0;
-  flex-direction:column;justify-content:center;
-  align-items:center;text-align:center;
-}
-
-#over h1{color:#ff4d6d;font-size:36px;text-shadow:0 0 25px #ff4d6d}
-#over p{font-size:18px}
-
-#again{
-  margin-top:20px;padding:14px 38px;
-  font-size:18px;font-weight:900;color:#021018;
   background:linear-gradient(90deg,#ffd166,#ff8fa3);
   border:none;border-radius:40px;
+  box-shadow:0 0 30px #ffd16677;
 }
-
-#controls{
-  position:fixed;bottom:0;left:0;right:0;
-  height:240px;display:none;
-  justify-content:space-between;align-items:center;
-  z-index:20;padding:0 18px 26px;
-  background:linear-gradient(180deg,transparent,#000000aa);
-}
-
-#movePad{
-  display:grid;
-  grid-template-columns:repeat(3,100px);
-  grid-template-rows:repeat(2,90px);
-  gap:8px;
-}
-
-.mbtn{
-  width:100px;height:90px;border-radius:18px;
-  font-size:38px;font-weight:bold;color:#fff;
-  background:linear-gradient(180deg,#123a5c,#081c2f);
-  border:3px solid #2f6d94;
-  box-shadow:0 0 25px #00e5ff44;
-  touch-action:none;user-select:none;
-}
-
-.mbtn:active{background:#0a7f9d;border-color:#7ff4ff}
-
-.blank{visibility:hidden}
-
-#fire{
-  width:180px;height:180px;border-radius:50%;
-  font-size:30px;font-weight:900;color:#fff;
-  background:radial-gradient(circle at 30% 30%,#ff6b81,#a3122c);
-  border:4px solid #ffb3c1;
-  box-shadow:0 0 35px #ff4d6d88;
-  touch-action:none;user-select:none;
-}
-
-#fire:active{transform:scale(0.94)}
 </style>
 </head>
 
 <body>
 
-<div id="hud">
-  <div id="hudText">HEALTH</div>
-  <div id="healthBar"><div id="healthFill"></div></div>
+<div id="top">
+  <div id="score">SCORE 0</div>
+  <div id="ammo">💣 10 | 💥 5 | 🚀 2</div>
 </div>
-
-<div id="kills">KILLS 0</div>
 
 <div id="start">
-  <h1>ZOMBIE HUNTER 3D</h1>
+  <h1>BOMB STRIKE</h1>
   <p>
-    झोंबीजन्ना शोधून गोळी मारा.<br>
-    तुझा हेल्थ संपला तर गेम संपेल.<br>
-    जास्तीत जास्त kills कर!
+    वरून बॉम्ब टाका.<br>
+    💣 छोटा बॉम्ब, 💥 मोठा बॉम्ब,<br>
+    🚀 मिसाईल निवडा.<br>
+    जास्तीत जास्त targets उडवा!
   </p>
-  <button id="play">START GAME</button>
+  <button id="play">START MISSION</button>
 </div>
 
-<div id="over">
-  <h1>YOU DIED</h1>
-  <p id="finalKills">KILLS 0</p>
-  <button id="again">PLAY AGAIN</button>
+<div id="weapons">
+  <button class="wbtn active" data-w="small">💣<br>SMALL</button>
+  <button id="drop">DROP<br>BOMB</button>
+  <button class="wbtn" data-w="big">💥<br>BIG</button>
+  <button class="wbtn" data-w="missile">🚀<br>MISSILE</button>
 </div>
 
-<div id="controls">
-  <div id="movePad">
-    <button class="mbtn blank">.</button>
-    <button class="mbtn" id="up">▲</button>
-    <button class="mbtn blank">.</button>
+<canvas id="game"></canvas>
 
-    <button class="mbtn" id="left">◀</button>
-    <button class="mbtn" id="down">▼</button>
-    <button class="mbtn" id="right">▶</button>
-  </div>
+<script>
+(() => {
 
-  <button id="fire">🔥<br>FIRE</button>
-</div>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-  }
-}
-</script>
+let W = innerWidth;
+let H = innerHeight;
+let DPR = Math.min(devicePixelRatio || 1, 2);
 
-<script type="module">
-import * as THREE from "three";
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0f18);
-scene.fog = new THREE.Fog(0x0a0f18, 30, 120);
-
-const camera = new THREE.PerspectiveCamera(
-  70,
-  innerWidth / innerHeight,
-  0.1,
-  300
-);
-
-const renderer = new THREE.WebGLRenderer({
-  canvas: document.getElementById("game"),
-  antialias: true
-});
-
-renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-
-addEventListener("resize", () => {
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-});
-
-/* Lights */
-const sun = new THREE.DirectionalLight(0xffffff, 1);
-sun.position.set(30, 50, 20);
-scene.add(sun);
-
-scene.add(new THREE.AmbientLight(0x88aaff, 0.6));
-
-/* Ground */
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(250, 250),
-  new THREE.MeshStandardMaterial({ color: 0x1a2430 })
-);
-
-ground.rotation.x = -Math.PI / 2;
-scene.add(ground);
-
-/* Buildings */
-for(let i=0;i<30;i++){
-  const w = 6 + Math.random() * 10;
-  const h = 8 + Math.random() * 25;
-  const d = 6 + Math.random() * 10;
-
-  const box = new THREE.Mesh(
-    new THREE.BoxGeometry(w,h,d),
-    new THREE.MeshStandardMaterial({
-      color: new THREE.Color().setHSL(Math.random(),0.3,0.22)
-    })
-  );
-
-  box.position.set(
-    (Math.random()-0.5) * 200,
-    h/2,
-    (Math.random()-0.5) * 200
-  );
-
-  scene.add(box);
+function resize(){
+  W = innerWidth;
+  H = innerHeight;
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 
-/* Human character */
-function createHuman(color){
-  const group = new THREE.Group();
+addEventListener("resize", resize);
+resize();
 
-  const skin = new THREE.MeshStandardMaterial({ color: 0xffd1a3 });
-  const cloth = new THREE.MeshStandardMaterial({ color: color });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x141a24 });
-
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.42,20,20),
-    skin
-  );
-  head.position.y = 2.35;
-  group.add(head);
-
-  const hair = new THREE.Mesh(
-    new THREE.SphereGeometry(0.43,20,20,0,Math.PI*2,0,Math.PI/2),
-    dark
-  );
-  hair.position.y = 2.42;
-  group.add(hair);
-
-  const torso = new THREE.Mesh(
-    new THREE.BoxGeometry(1.1,1.4,0.6),
-    cloth
-  );
-  torso.position.y = 1.5;
-  group.add(torso);
-
-  const leftArm = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.16,0.9,4,8),
-    skin
-  );
-  leftArm.position.set(-0.75,1.55,0);
-  group.add(leftArm);
-
-  const rightArm = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.16,0.9,4,8),
-    skin
-  );
-  rightArm.position.set(0.75,1.55,0);
-  group.add(rightArm);
-
-  const leftLeg = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.2,1,4,8),
-    dark
-  );
-  leftLeg.position.set(-0.3,0.45,0);
-  group.add(leftLeg);
-
-  const rightLeg = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.2,1,4,8),
-    dark
-  );
-  rightLeg.position.set(0.3,0.45,0);
-  group.add(rightLeg);
-
-  return group;
-}
-
-/* Player */
-const player = createHuman(0x00e5ff);
-
-const gun = new THREE.Mesh(
-  new THREE.BoxGeometry(0.22,0.22,1.5),
-  new THREE.MeshStandardMaterial({ color: 0x222831 })
-);
-
-gun.position.set(0.75,1.6,-0.9);
-player.add(gun);
-
-player.position.set(0,0,0);
-scene.add(player);
-
-/* Zombies */
-const zombies = [];
-
-function createZombie(){
-  const z = createHuman(0x3fae4a);
-
-  z.position.set(
-    (Math.random()-0.5) * 160,
-    0,
-    (Math.random()-0.5) * 160
-  );
-
-  z.userData = {
-    health: 100,
-    speed: 0.06 + Math.random() * 0.05
-  };
-
-  scene.add(z);
-  zombies.push(z);
-}
-
-for(let i=0;i<10;i++){
-  createZombie();
-}
-
-/* Game state */
 let playing = false;
-let health = 100;
-let kills = 0;
+let score = 0;
 
-let up=false, down=false, left=false, right=false;
+let planeX = W/2;
+let planeDir = 1;
 
-/* Controls */
-function bind(id, action){
-  const el = document.getElementById(id);
+let weapon = "small";
 
-  el.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    action(true);
-  });
+let ammo = {
+  small: 10,
+  big: 5,
+  missile: 2
+};
 
-  el.addEventListener("pointerup", () => action(false));
-  el.addEventListener("pointercancel", () => action(false));
-  el.addEventListener("pointerleave", () => action(false));
-}
+let bombs = [];
+let explosions = [];
+let targets = [];
 
-bind("up", v => up = v);
-bind("down", v => down = v);
-bind("left", v => left = v);
-bind("right", v => right = v);
+const weaponPower = {
+  small: 70,
+  big: 130,
+  missile: 190
+};
 
-document.getElementById("fire").addEventListener("pointerdown", e => {
-  e.preventDefault();
-  shoot();
-});
+const weaponAmmoUse = {
+  small: 1,
+  big: 1,
+  missile: 1
+};
 
-addEventListener("keydown", e => {
-  if(e.key === "w" || e.key === "ArrowUp") up = true;
-  if(e.key === "s" || e.key === "ArrowDown") down = true;
-  if(e.key === "a" || e.key === "ArrowLeft") left = true;
-  if(e.key === "d" || e.key === "ArrowRight") right = true;
-  if(e.key === " ") shoot();
-});
-
-addEventListener("keyup", e => {
-  if(e.key === "w" || e.key === "ArrowUp") up = false;
-  if(e.key === "s" || e.key === "ArrowDown") down = false;
-  if(e.key === "a" || e.key === "ArrowLeft") left = false;
-  if(e.key === "d" || e.key === "ArrowRight") right = false;
-});
-
-document.addEventListener("contextmenu", e => e.preventDefault());
-
-/* Shooting */
-const bullets = [];
-
-function shoot(){
-  if(!playing) return;
-
-  const bullet = new THREE.Mesh(
-    new THREE.SphereGeometry(0.16,8,8),
-    new THREE.MeshBasicMaterial({ color: 0xffd166 })
-  );
-
-  bullet.position.copy(player.position);
-  bullet.position.y = 1.7;
-
-  const dir = new THREE.Vector3();
-  camera.getWorldDirection(dir);
-
-  bullet.userData = {
-    direction: dir,
-    life: 80
-  };
-
-  scene.add(bullet);
-  bullets.push(bullet);
-}
-
-function updateBullets(){
-  for(let i=bullets.length-1;i>=0;i--){
-    const b = bullets[i];
-
-    b.position.addScaledVector(b.userData.direction, 1.8);
-    b.userData.life--;
-
-    let hit = false;
-
-    zombies.forEach(z => {
-      if(z.userData.health > 0){
-        if(z.position.distanceTo(b.position) < 1.8){
-          z.userData.health -= 40;
-          hit = true;
-
-          if(z.userData.health <= 0){
-            scene.remove(z);
-            kills++;
-
-            document.getElementById("kills").textContent =
-              "KILLS " + kills;
-
-            setTimeout(createZombie, 3000);
-          }
-        }
-      }
-    });
-
-    if(hit || b.userData.life <= 0){
-      scene.remove(b);
-      bullets.splice(i,1);
-    }
-  }
-}
-
-/* Zombie AI */
-function updateZombies(){
-  zombies.forEach(z => {
-    if(z.userData.health <= 0) return;
-
-    const dir = new THREE.Vector3()
-      .subVectors(player.position, z.position)
-      .normalize();
-
-    z.position.addScaledVector(dir, z.userData.speed);
-    z.lookAt(player.position);
-
-    if(z.position.distanceTo(player.position) < 2.2){
-      health -= 0.4;
-    }
-  });
-
-  document.getElementById("healthFill").style.width =
-    Math.max(0, health) + "%";
-
-  if(health <= 0 && playing){
-    playing = false;
-
-    document.getElementById("finalKills").textContent =
-      "KILLS " + kills;
-
-    document.getElementById("over").style.display = "flex";
-    document.getElementById("controls").style.display = "none";
-  }
-}
-
-/* Start game */
 function startGame(){
   playing = true;
-  health = 100;
-  kills = 0;
+  score = 0;
 
-  document.getElementById("kills").textContent = "KILLS 0";
-  document.getElementById("healthFill").style.width = "100%";
+  ammo = { small:10, big:5, missile:2 };
+  bombs = [];
+  explosions = [];
+  targets = [];
+
+  for(let i=0;i<14;i++){
+    targets.push({
+      x: 40 + Math.random() * (W - 80),
+      y: H * 0.65 + Math.random() * (H * 0.25),
+      r: 14 + Math.random() * 10,
+      alive: true
+    });
+  }
 
   document.getElementById("start").style.display = "none";
-  document.getElementById("over").style.display = "none";
-  document.getElementById("controls").style.display = "flex";
+  updateHUD();
 }
 
 document.getElementById("play").addEventListener("click", startGame);
-document.getElementById("again").addEventListener("click", startGame);
 
-/* Camera */
-function updateCamera(){
-  const target = player.position.clone().add(new THREE.Vector3(0,7,12));
+/* Weapon selection */
+document.querySelectorAll("[data-w]").forEach(btn => {
+  btn.addEventListener("pointerdown", e => {
+    e.preventDefault();
 
-  camera.position.lerp(target, 0.12);
-  camera.lookAt(
-    player.position.x,
-    player.position.y + 2,
-    player.position.z - 5
-  );
+    weapon = btn.dataset.w;
+
+    document.querySelectorAll("[data-w]").forEach(b =>
+      b.classList.remove("active")
+    );
+
+    btn.classList.add("active");
+  });
+});
+
+/* Drop bomb */
+document.getElementById("drop").addEventListener("pointerdown", e => {
+  e.preventDefault();
+  dropBomb();
+});
+
+addEventListener("keydown", e => {
+  if(e.key === " ") dropBomb();
+  if(e.key === "1") selectWeapon("small");
+  if(e.key === "2") selectWeapon("big");
+  if(e.key === "3") selectWeapon("missile");
+});
+
+function selectWeapon(w){
+  weapon = w;
+
+  document.querySelectorAll("[data-w]").forEach(b => {
+    b.classList.toggle("active", b.dataset.w === w);
+  });
 }
 
-/* Loop */
-function animate(){
-  requestAnimationFrame(animate);
+function dropBomb(){
+  if(!playing) return;
 
-  if(playing){
-    const speed = 0.25;
+  if(ammo[weapon] <= 0) return;
 
-    if(up) player.position.z -= speed;
-    if(down) player.position.z += speed;
-    if(left) player.position.x -= speed;
-    if(right) player.position.x += speed;
+  ammo[weapon]--;
 
-    player.position.x = Math.max(-120, Math.min(120, player.position.x));
-    player.position.z = Math.max(-120, Math.min(120, player.position.z));
+  bombs.push({
+    x: planeX,
+    y: 90,
+    vy: 2,
+    type: weapon,
+    power: weaponPower[weapon]
+  });
 
-    updateZombies();
-    updateBullets();
+  updateHUD();
+}
+
+function updateHUD(){
+  document.getElementById("score").textContent =
+    "SCORE " + score;
+
+  document.getElementById("ammo").textContent =
+    "💣 " + ammo.small +
+    " | 💥 " + ammo.big +
+    " | 🚀 " + ammo.missile;
+}
+
+function update(){
+  if(!playing) return;
+
+  planeX += planeDir * 2.2;
+
+  if(planeX > W - 60){
+    planeX = W - 60;
+    planeDir = -1;
   }
 
-  updateCamera();
-  renderer.render(scene, camera);
+  if(planeX < 60){
+    planeX = 60;
+    planeDir = 1;
+  }
+
+  bombs.forEach(b => {
+    b.y += b.vy;
+    b.vy += 0.18;
+
+    if(b.type === "missile"){
+      b.y += 3;
+    }
+
+    if(b.y >= H - 40){
+      explode(b.x, H - 40, b.power);
+      b.dead = true;
+    }
+  });
+
+  bombs = bombs.filter(b => !b.dead);
+
+  explosions.forEach(e => e.life--);
+  explosions = explosions.filter(e => e.life > 0);
 }
 
-animate();
+function explode(x,y,power){
+  explosions.push({
+    x:x, y:y, r:10, maxR:power, life:30
+  });
 
+  targets.forEach(t => {
+    if(t.alive){
+      const distance = Math.hypot(t.x - x, t.y - y);
+
+      if(distance < power){
+        t.alive = false;
+        score += 100;
+      }
+    }
+  });
+
+  updateHUD();
+}
+
+function draw(){
+  update();
+
+  const sky = ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,"#050914");
+  sky.addColorStop(1,"#101a28");
+
+  ctx.fillStyle = sky;
+  ctx.fillRect(0,0,W,H);
+
+  /* Ground */
+  ctx.fillStyle = "#16222e";
+  ctx.fillRect(0,H-40,W,40);
+
+  /* Targets */
+  targets.forEach(t => {
+    if(!t.alive) return;
+
+    ctx.fillStyle = "#ff4d6d";
+    ctx.shadowColor = "#ff4d6d";
+    ctx.shadowBlur = 15;
+
+    ctx.beginPath();
+    ctx.arc(t.x,t.y,t.r,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 12px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("🎯",t.x,t.y+5);
+  });
+
+  /* Plane */
+  ctx.fillStyle = "#00e5ff";
+  ctx.shadowColor = "#00e5ff";
+  ctx.shadowBlur = 25;
+
+  ctx.beginPath();
+  ctx.moveTo(planeX-45,80);
+  ctx.lineTo(planeX,60);
+  ctx.lineTo(planeX+45,80);
+  ctx.lineTo(planeX,95);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+
+  /* Bombs */
+  bombs.forEach(b => {
+    ctx.fillStyle = b.type === "missile" ? "#ff7ad9" : "#ffd166";
+    ctx.shadowColor = ctx.fillStyle;
+    ctx.shadowBlur = 20;
+
+    ctx.beginPath();
+    ctx.arc(b.x,b.y,b.type === "missile" ? 10 : 8,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+  });
+
+  /* Explosions */
+  explosions.forEach(e => {
+    const progress = 1 - e.life / 30;
+    const radius = e.r + (e.maxR - e.r) * progress;
+
+    ctx.globalAlpha = e.life / 30;
+
+    const gradient = ctx.createRadialGradient(
+      e.x,e.y,5,e.x,e.y,radius
+    );
+
+    gradient.addColorStop(0,"#fff3b0");
+    gradient.addColorStop(0.5,"#ff8c42");
+    gradient.addColorStop(1,"#ff2e63");
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(e.x,e.y,radius,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.globalAlpha = 1;
+  });
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+})();
 </script>
 
 </body>
