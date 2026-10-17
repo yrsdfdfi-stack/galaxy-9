@@ -2,280 +2,536 @@
 <html lang="mr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NEONFLIX — Watch & Download</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>ZOMBIE HUNTER 3D</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
-body{
-  background:#05060c;
-  color:#fff;
-  font-family:Arial,sans-serif;
-  overflow-x:hidden;
+html,body{
+  margin:0;padding:0;width:100%;height:100%;
+  overflow:hidden;background:#000;color:#fff;
+  font-family:Arial,sans-serif;touch-action:none;
+  user-select:none;-webkit-user-select:none;
 }
 
-nav{
-  position:sticky;top:0;z-index:100;
-  background:#05060cf2;
-  backdrop-filter:blur(10px);
-  padding:14px 20px;
-  border-bottom:1px solid #ffffff10;
+canvas{display:block;width:100vw;height:100dvh;touch-action:none}
+
+#hud{
+  position:fixed;top:10px;left:12px;z-index:10;
+  background:#04121ecc;border:1px solid #1d4a68;
+  border-radius:14px;padding:10px 14px;
 }
 
-.logo{
-  font-size:24px;font-weight:900;
-  color:#ff2e63;
-  text-shadow:0 0 15px #ff2e6388;
+#healthBar{
+  width:170px;height:12px;background:#251018;
+  border-radius:20px;overflow:hidden;margin-top:6px;
 }
 
-.logo span{color:#00e5ff}
-
-/* CATEGORIES */
-.categories{
-  display:flex;
-  gap:10px;
-  overflow-x:auto;
-  padding:14px 20px;
-  background:#070a12;
-  border-bottom:1px solid #ffffff10;
+#healthFill{
+  height:100%;width:100%;
+  background:linear-gradient(90deg,#ff4d6d,#ff8fa3);
 }
 
-.categories::-webkit-scrollbar{display:none}
+#hudText{font-size:14px;font-weight:bold}
 
-.cat{
-  padding:9px 20px;
-  border-radius:30px;
-  background:#101a28;
-  border:1px solid #ffffff18;
-  font-size:14px;
-  font-weight:bold;
-  color:#c9d6e2;
-  cursor:pointer;
-  white-space:nowrap;
+#kills{
+  position:fixed;top:10px;right:12px;z-index:10;
+  background:#04121ecc;border:1px solid #1d4a68;
+  border-radius:14px;padding:10px 14px;
+  font-size:16px;font-weight:bold;color:#7cff5f;
 }
 
-.cat.active{
-  background:#00e5ff;
-  color:#021018;
-  border-color:#00e5ff;
+#start{
+  position:fixed;inset:0;z-index:30;
+  background:radial-gradient(circle at center,#0b1d33,#000);
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  text-align:center;padding:24px;
 }
 
-/* VIDEO GRID */
-main{
-  padding:22px 16px 60px;
+#start h1{
+  font-size:38px;margin:0;color:#7cff5f;
+  text-shadow:0 0 25px #7cff5f;
 }
 
-.grid{
+#start p{
+  color:#b9d6e8;font-size:15px;line-height:1.6;
+  max-width:340px;
+}
+
+#play{
+  margin-top:24px;padding:16px 44px;
+  font-size:20px;font-weight:900;color:#021018;
+  background:linear-gradient(90deg,#7cff5f,#00e5ff);
+  border:none;border-radius:40px;
+  box-shadow:0 0 30px #7cff5f88;
+}
+
+#over{
+  position:fixed;inset:0;z-index:30;display:none;
+  background:#000000e0;
+  flex-direction:column;justify-content:center;
+  align-items:center;text-align:center;
+}
+
+#over h1{color:#ff4d6d;font-size:36px;text-shadow:0 0 25px #ff4d6d}
+#over p{font-size:18px}
+
+#again{
+  margin-top:20px;padding:14px 38px;
+  font-size:18px;font-weight:900;color:#021018;
+  background:linear-gradient(90deg,#ffd166,#ff8fa3);
+  border:none;border-radius:40px;
+}
+
+#controls{
+  position:fixed;bottom:0;left:0;right:0;
+  height:240px;display:none;
+  justify-content:space-between;align-items:center;
+  z-index:20;padding:0 18px 26px;
+  background:linear-gradient(180deg,transparent,#000000aa);
+}
+
+#movePad{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-  gap:14px;
+  grid-template-columns:repeat(3,100px);
+  grid-template-rows:repeat(2,90px);
+  gap:8px;
 }
 
-.card{
-  background:#0c1420;
-  border-radius:14px;
-  overflow:hidden;
-  border:1px solid #ffffff12;
-  transition:.2s;
+.mbtn{
+  width:100px;height:90px;border-radius:18px;
+  font-size:38px;font-weight:bold;color:#fff;
+  background:linear-gradient(180deg,#123a5c,#081c2f);
+  border:3px solid #2f6d94;
+  box-shadow:0 0 25px #00e5ff44;
+  touch-action:none;user-select:none;
 }
 
-.card:hover{
-  transform:translateY(-5px);
-  border-color:#00e5ff66;
+.mbtn:active{background:#0a7f9d;border-color:#7ff4ff}
+
+.blank{visibility:hidden}
+
+#fire{
+  width:180px;height:180px;border-radius:50%;
+  font-size:30px;font-weight:900;color:#fff;
+  background:radial-gradient(circle at 30% 30%,#ff6b81,#a3122c);
+  border:4px solid #ffb3c1;
+  box-shadow:0 0 35px #ff4d6d88;
+  touch-action:none;user-select:none;
 }
 
-.thumb{
-  position:relative;
-  height:110px;
-  background:#000;
-}
-
-.thumb video{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.playIcon{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:44px;height:44px;
-  background:#00e5ffcc;
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;
-  color:#021018;
-  pointer-events:none;
-}
-
-.info{
-  padding:10px;
-}
-
-.info h3{
-  font-size:13px;
-  margin-bottom:4px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.info p{
-  font-size:11px;
-  color:#8fa3b5;
-  margin-bottom:8px;
-}
-
-.rating{color:#ffd166;font-weight:bold}
-
-.download{
-  display:block;
-  width:100%;
-  padding:8px;
-  border:none;
-  border-radius:9px;
-  background:linear-gradient(90deg,#00e5ff,#7cffcb);
-  color:#021018;
-  font-size:12px;
-  font-weight:900;
-  text-decoration:none;
-  text-align:center;
-}
-
-footer{
-  padding:35px 20px;
-  background:#04050a;
-  border-top:1px solid #ffffff10;
-  text-align:center;
-  color:#7d8fa0;
-  font-size:12px;
-}
+#fire:active{transform:scale(0.94)}
 </style>
 </head>
 
 <body>
 
-<nav>
-  <div class="logo">NEON<span>FLIX</span></div>
-</nav>
-
-<!-- CATEGORIES -->
-<div class="categories">
-  <div class="cat active">All</div>
-  <div class="cat">Marathi</div>
-  <div class="cat">Hindi</div>
-  <div class="cat">English</div>
+<div id="hud">
+  <div id="hudText">HEALTH</div>
+  <div id="healthBar"><div id="healthFill"></div></div>
 </div>
 
-<!-- VIDEO GRID -->
-<main>
-  <div class="grid">
+<div id="kills">KILLS 0</div>
 
-    <!-- VIDEO 1 -->
-    <div class="card">
-      <div class="thumb">
-        <video
-          src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
-          muted
-          playsinline
-        ></video>
-        <div class="playIcon">▶</div>
-      </div>
+<div id="start">
+  <h1>ZOMBIE HUNTER 3D</h1>
+  <p>
+    झोंबीजन्ना शोधून गोळी मारा.<br>
+    तुझा हेल्थ संपला तर गेम संपेल.<br>
+    जास्तीत जास्त kills कर!
+  </p>
+  <button id="play">START GAME</button>
+</div>
 
-      <div class="info">
-        <h3>My First Video</h3>
-        <p><span class="rating">★ NEW</span> · Marathi</p>
-        <a
-          class="download"
-          href="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
-          download
-        >
-          ⬇ Download
-        </a>
-      </div>
-    </div>
+<div id="over">
+  <h1>YOU DIED</h1>
+  <p id="finalKills">KILLS 0</p>
+  <button id="again">PLAY AGAIN</button>
+</div>
 
-    <!-- VIDEO 2 -->
-    <div class="card">
-      <div class="thumb">
-        <video
-          src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
-          muted
-          playsinline
-        ></video>
-        <div class="playIcon">▶</div>
-      </div>
+<div id="controls">
+  <div id="movePad">
+    <button class="mbtn blank">.</button>
+    <button class="mbtn" id="up">▲</button>
+    <button class="mbtn blank">.</button>
 
-      <div class="info">
-        <h3>Neon City Trailer</h3>
-        <p><span class="rating">★ 8.9</span> · Hindi</p>
-        <a
-          class="download"
-          href="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
-          download
-        >
-          ⬇ Download
-        </a>
-      </div>
-    </div>
-
-    <!-- VIDEO 3 -->
-    <div class="card">
-      <div class="thumb">
-        <video
-          src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
-          muted
-          playsinline
-        ></video>
-        <div class="playIcon">▶</div>
-      </div>
-
-      <div class="info">
-        <h3>Action Clip</h3>
-        <p><span class="rating">★ 8.4</span> · English</p>
-        <a
-          class="download"
-          href="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
-          download
-        >
-          ⬇ Download
-        </a>
-      </div>
-    </div>
-
+    <button class="mbtn" id="left">◀</button>
+    <button class="mbtn" id="down">▼</button>
+    <button class="mbtn" id="right">▶</button>
   </div>
-</main>
 
-<footer>
-  <b>NEONFLIX</b><br>
-  Watch and download videos.
-</footer>
+  <button id="fire">🔥<br>FIRE</button>
+</div>
 
-<script>
-const cats = document.querySelectorAll(".cat");
-const cards = document.querySelectorAll(".card");
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
 
-cats.forEach(cat => {
-  cat.addEventListener("click", () => {
+<script type="module">
+import * as THREE from "three";
 
-    cats.forEach(c => c.classList.remove("active"));
-    cat.classList.add("active");
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0f18);
+scene.fog = new THREE.Fog(0x0a0f18, 30, 120);
 
-    const selected = cat.textContent.trim();
+const camera = new THREE.PerspectiveCamera(
+  70,
+  innerWidth / innerHeight,
+  0.1,
+  300
+);
 
-    cards.forEach(card => {
-      const text = card.innerText;
+const renderer = new THREE.WebGLRenderer({
+  canvas: document.getElementById("game"),
+  antialias: true
+});
 
-      if(selected === "All"){
-        card.style.display = "block";
-      }else{
-        card.style.display = text.includes(selected) ? "block" : "none";
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+/* Lights */
+const sun = new THREE.DirectionalLight(0xffffff, 1);
+sun.position.set(30, 50, 20);
+scene.add(sun);
+
+scene.add(new THREE.AmbientLight(0x88aaff, 0.6));
+
+/* Ground */
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(250, 250),
+  new THREE.MeshStandardMaterial({ color: 0x1a2430 })
+);
+
+ground.rotation.x = -Math.PI / 2;
+scene.add(ground);
+
+/* Buildings */
+for(let i=0;i<30;i++){
+  const w = 6 + Math.random() * 10;
+  const h = 8 + Math.random() * 25;
+  const d = 6 + Math.random() * 10;
+
+  const box = new THREE.Mesh(
+    new THREE.BoxGeometry(w,h,d),
+    new THREE.MeshStandardMaterial({
+      color: new THREE.Color().setHSL(Math.random(),0.3,0.22)
+    })
+  );
+
+  box.position.set(
+    (Math.random()-0.5) * 200,
+    h/2,
+    (Math.random()-0.5) * 200
+  );
+
+  scene.add(box);
+}
+
+/* Human character */
+function createHuman(color){
+  const group = new THREE.Group();
+
+  const skin = new THREE.MeshStandardMaterial({ color: 0xffd1a3 });
+  const cloth = new THREE.MeshStandardMaterial({ color: color });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x141a24 });
+
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.42,20,20),
+    skin
+  );
+  head.position.y = 2.35;
+  group.add(head);
+
+  const hair = new THREE.Mesh(
+    new THREE.SphereGeometry(0.43,20,20,0,Math.PI*2,0,Math.PI/2),
+    dark
+  );
+  hair.position.y = 2.42;
+  group.add(hair);
+
+  const torso = new THREE.Mesh(
+    new THREE.BoxGeometry(1.1,1.4,0.6),
+    cloth
+  );
+  torso.position.y = 1.5;
+  group.add(torso);
+
+  const leftArm = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.16,0.9,4,8),
+    skin
+  );
+  leftArm.position.set(-0.75,1.55,0);
+  group.add(leftArm);
+
+  const rightArm = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.16,0.9,4,8),
+    skin
+  );
+  rightArm.position.set(0.75,1.55,0);
+  group.add(rightArm);
+
+  const leftLeg = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.2,1,4,8),
+    dark
+  );
+  leftLeg.position.set(-0.3,0.45,0);
+  group.add(leftLeg);
+
+  const rightLeg = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.2,1,4,8),
+    dark
+  );
+  rightLeg.position.set(0.3,0.45,0);
+  group.add(rightLeg);
+
+  return group;
+}
+
+/* Player */
+const player = createHuman(0x00e5ff);
+
+const gun = new THREE.Mesh(
+  new THREE.BoxGeometry(0.22,0.22,1.5),
+  new THREE.MeshStandardMaterial({ color: 0x222831 })
+);
+
+gun.position.set(0.75,1.6,-0.9);
+player.add(gun);
+
+player.position.set(0,0,0);
+scene.add(player);
+
+/* Zombies */
+const zombies = [];
+
+function createZombie(){
+  const z = createHuman(0x3fae4a);
+
+  z.position.set(
+    (Math.random()-0.5) * 160,
+    0,
+    (Math.random()-0.5) * 160
+  );
+
+  z.userData = {
+    health: 100,
+    speed: 0.06 + Math.random() * 0.05
+  };
+
+  scene.add(z);
+  zombies.push(z);
+}
+
+for(let i=0;i<10;i++){
+  createZombie();
+}
+
+/* Game state */
+let playing = false;
+let health = 100;
+let kills = 0;
+
+let up=false, down=false, left=false, right=false;
+
+/* Controls */
+function bind(id, action){
+  const el = document.getElementById(id);
+
+  el.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    action(true);
+  });
+
+  el.addEventListener("pointerup", () => action(false));
+  el.addEventListener("pointercancel", () => action(false));
+  el.addEventListener("pointerleave", () => action(false));
+}
+
+bind("up", v => up = v);
+bind("down", v => down = v);
+bind("left", v => left = v);
+bind("right", v => right = v);
+
+document.getElementById("fire").addEventListener("pointerdown", e => {
+  e.preventDefault();
+  shoot();
+});
+
+addEventListener("keydown", e => {
+  if(e.key === "w" || e.key === "ArrowUp") up = true;
+  if(e.key === "s" || e.key === "ArrowDown") down = true;
+  if(e.key === "a" || e.key === "ArrowLeft") left = true;
+  if(e.key === "d" || e.key === "ArrowRight") right = true;
+  if(e.key === " ") shoot();
+});
+
+addEventListener("keyup", e => {
+  if(e.key === "w" || e.key === "ArrowUp") up = false;
+  if(e.key === "s" || e.key === "ArrowDown") down = false;
+  if(e.key === "a" || e.key === "ArrowLeft") left = false;
+  if(e.key === "d" || e.key === "ArrowRight") right = false;
+});
+
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+/* Shooting */
+const bullets = [];
+
+function shoot(){
+  if(!playing) return;
+
+  const bullet = new THREE.Mesh(
+    new THREE.SphereGeometry(0.16,8,8),
+    new THREE.MeshBasicMaterial({ color: 0xffd166 })
+  );
+
+  bullet.position.copy(player.position);
+  bullet.position.y = 1.7;
+
+  const dir = new THREE.Vector3();
+  camera.getWorldDirection(dir);
+
+  bullet.userData = {
+    direction: dir,
+    life: 80
+  };
+
+  scene.add(bullet);
+  bullets.push(bullet);
+}
+
+function updateBullets(){
+  for(let i=bullets.length-1;i>=0;i--){
+    const b = bullets[i];
+
+    b.position.addScaledVector(b.userData.direction, 1.8);
+    b.userData.life--;
+
+    let hit = false;
+
+    zombies.forEach(z => {
+      if(z.userData.health > 0){
+        if(z.position.distanceTo(b.position) < 1.8){
+          z.userData.health -= 40;
+          hit = true;
+
+          if(z.userData.health <= 0){
+            scene.remove(z);
+            kills++;
+
+            document.getElementById("kills").textContent =
+              "KILLS " + kills;
+
+            setTimeout(createZombie, 3000);
+          }
+        }
       }
     });
+
+    if(hit || b.userData.life <= 0){
+      scene.remove(b);
+      bullets.splice(i,1);
+    }
+  }
+}
+
+/* Zombie AI */
+function updateZombies(){
+  zombies.forEach(z => {
+    if(z.userData.health <= 0) return;
+
+    const dir = new THREE.Vector3()
+      .subVectors(player.position, z.position)
+      .normalize();
+
+    z.position.addScaledVector(dir, z.userData.speed);
+    z.lookAt(player.position);
+
+    if(z.position.distanceTo(player.position) < 2.2){
+      health -= 0.4;
+    }
   });
-});
+
+  document.getElementById("healthFill").style.width =
+    Math.max(0, health) + "%";
+
+  if(health <= 0 && playing){
+    playing = false;
+
+    document.getElementById("finalKills").textContent =
+      "KILLS " + kills;
+
+    document.getElementById("over").style.display = "flex";
+    document.getElementById("controls").style.display = "none";
+  }
+}
+
+/* Start game */
+function startGame(){
+  playing = true;
+  health = 100;
+  kills = 0;
+
+  document.getElementById("kills").textContent = "KILLS 0";
+  document.getElementById("healthFill").style.width = "100%";
+
+  document.getElementById("start").style.display = "none";
+  document.getElementById("over").style.display = "none";
+  document.getElementById("controls").style.display = "flex";
+}
+
+document.getElementById("play").addEventListener("click", startGame);
+document.getElementById("again").addEventListener("click", startGame);
+
+/* Camera */
+function updateCamera(){
+  const target = player.position.clone().add(new THREE.Vector3(0,7,12));
+
+  camera.position.lerp(target, 0.12);
+  camera.lookAt(
+    player.position.x,
+    player.position.y + 2,
+    player.position.z - 5
+  );
+}
+
+/* Loop */
+function animate(){
+  requestAnimationFrame(animate);
+
+  if(playing){
+    const speed = 0.25;
+
+    if(up) player.position.z -= speed;
+    if(down) player.position.z += speed;
+    if(left) player.position.x -= speed;
+    if(right) player.position.x += speed;
+
+    player.position.x = Math.max(-120, Math.min(120, player.position.x));
+    player.position.z = Math.max(-120, Math.min(120, player.position.z));
+
+    updateZombies();
+    updateBullets();
+  }
+
+  updateCamera();
+  renderer.render(scene, camera);
+}
+
+animate();
+
 </script>
 
 </body>
