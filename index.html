@@ -1,30 +1,169 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ZORQUINT Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>ZORQUINT: CITY RISE</title>
 <style>
-body{margin:0;background:#10152b;color:white;font-family:Arial;text-align:center}
-h1{color:#55e6ff}
-#game{max-width:420px;margin:20px auto;padding:20px}
-button{font-size:20px;padding:14px 22px;margin:8px;border:0;border-radius:12px;background:#55e6ff;color:#10152b;font-weight:bold}
-#coin{font-size:75px;margin:25px}
+*{box-sizing:border-box}
+body{margin:0;background:#080d18;color:white;font-family:Arial,sans-serif;overflow:hidden}
+#top{height:64px;background:#101a2b;border-bottom:1px solid #263b5c;display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
+.logo{font-weight:900;color:#65e5ff;letter-spacing:1px;font-size:17px}
+.small{font-size:11px;color:#aabbd1;margin-top:4px}
+#stats{font-size:12px;text-align:right;line-height:1.7}
+#game{display:block;width:100%;height:calc(100dvh - 150px);background:#182a31;touch-action:none}
+#mission{position:absolute;top:76px;left:10px;background:#101a2bdf;border:1px solid #46617d;border-radius:10px;padding:10px 12px;max-width:76%;font-size:12px;line-height:1.5}
+#mission b{color:#65e5ff}
+#controls{height:86px;display:flex;align-items:center;justify-content:space-around;background:#0c1422;padding:8px}
+.ctrl{border:1px solid #3a5d7c;border-radius:14px;background:#182b42;color:white;font-size:21px;font-weight:bold;width:58px;height:54px;touch-action:none}
+.ctrl:active{background:#17637b}
+#pad{display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,32px);gap:3px}
+#pad .ctrl{width:44px;height:32px;font-size:16px;border-radius:8px}
+#pad .empty{visibility:hidden}
+#action{width:78px;height:58px;background:#075a72;color:#fff;font-size:12px}
+#toast{position:absolute;bottom:155px;left:50%;transform:translateX(-50%);background:#06121ddd;border:1px solid #65e5ff;padding:9px 13px;border-radius:9px;font-size:12px;white-space:nowrap;display:none}
 </style>
 </head>
 <body>
-<div id="game">
-<h1>ZORQUINT</h1>
-<h2>Coin Clicker Game</h2>
-<p>Tap the coin to score points!</p>
-<div id="coin" onclick="score++ ; update()">🪙</div>
-<h2>Score: <span id="score">0</span></h2>
-<button onclick="score++;update()">TAP TO EARN</button>
-<button onclick="score=0;update()">RESTART</button>
+<header id="top">
+  <div><div class="logo">ZORQUINT</div><div class="small">CITY RISE · OPEN WORLD</div></div>
+  <div id="stats">🪙 <span id="coins">0</span> coins<br>MISSION <span id="done">0</span>/5</div>
+</header>
+<div id="mission">🎯 <b>CITY MISSION</b><br><span id="task">Reach the glowing checkpoint.</span><br>Move with the controls below.</div>
+<canvas id="game"></canvas>
+<div id="toast"></div>
+<div id="controls">
+  <div id="pad">
+    <button class="ctrl empty">•</button><button class="ctrl" data-key="up">▲</button><button class="ctrl empty">•</button>
+    <button class="ctrl" data-key="left">◀</button><button class="ctrl" data-key="down">▼</button><button class="ctrl" data-key="right">▶</button>
+  </div>
+  <button class="ctrl" id="action">MISSION<br>INFO</button>
 </div>
 <script>
-let score=0;
-function update(){document.getElementById('score').textContent=score;}
+const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
+let W=0,H=0;
+function resize(){const r=canvas.getBoundingClientRect();W=canvas.width=Math.floor(r.width*devicePixelRatio);H=canvas.height=Math.floor(r.height*devicePixelRatio);ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);W=r.width;H=r.height}
+addEventListener("resize",resize);resize();
+
+const world={w:2200,h:2200};
+const player={x:1100,y:1100,r:13,speed:3.2};
+let coins=Number(localStorage.getItem("zrCoins")||0);
+let done=Number(localStorage.getItem("zrDone")||0);
+done=Math.min(5,done);
+document.getElementById("coins").textContent=coins;
+document.getElementById("done").textContent=done;
+
+const buildings=[];
+for(let y=100;y<world.h-100;y+=220){
+ for(let x=100;x<world.w-100;x+=220){
+  buildings.push({x:x+Math.random()*18,y:y+Math.random()*18,w:105+Math.random()*55,h:105+Math.random()*55,c:["#30465b","#394455","#364d54","#41465e"][Math.floor(Math.random()*4)]});
+ }
+}
+const missions=[
+ {x:1100,y:800,name:"Visit Central Station"},
+ {x:1540,y:1100,name:"Explore Neon Market"},
+ {x:1100,y:1540,name:"Reach Riverside"},
+ {x:660,y:1100,name:"Find the Old Town"},
+ {x:660,y:660,name:"Complete City Tour"}
+];
+let target=missions[done]||missions[4];
+let keys={};
+const down=k=>keys[k]=true,up=k=>keys[k]=false;
+addEventListener("keydown",e=>{let k=e.key.toLowerCase();if(["arrowup","w"].includes(k))down("up");if(["arrowdown","s"].includes(k))down("down");if(["arrowleft","a"].includes(k))down("left");if(["arrowright","d"].includes(k))down("right")});
+addEventListener("keyup",e=>{let k=e.key.toLowerCase();if(["arrowup","w"].includes(k))up("up");if(["arrowdown","s"].includes(k))up("down");if(["arrowleft","a"].includes(k))up("left");if(["arrowright","d"].includes(k))up("right")});
+document.querySelectorAll("[data-key]").forEach(b=>{
+ const k=b.dataset.key;
+ b.addEventListener("pointerdown",e=>{e.preventDefault();down(k)});
+ ["pointerup","pointercancel","pointerleave"].forEach(ev=>b.addEventListener(ev,()=>up(k)));
+});
+function toast(s){const t=document.getElementById("toast");t.textContent=s;t.style.display="block";clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.style.display="none",2000)}
+document.getElementById("action").onclick=()=>toast(done>=5?"🏆 CITY TOUR COMPLETED!":"🎯 "+target.name);
+
+function blocked(x,y){
+ for(const b of buildings){
+  if(x>b.x-player.r&&x<b.x+b.w+player.r&&y>b.y-player.r&&y<b.y+b.h+player.r)return true;
+ }
+ return false;
+}
+function update(){
+ let dx=(keys.right?1:0)-(keys.left?1:0);
+ let dy=(keys.down?1:0)-(keys.up?1:0);
+ if(dx&&dy){dx*=0.707;dy*=0.707}
+ let nx=Math.max(15,Math.min(world.w-15,player.x+dx*player.speed));
+ let ny=Math.max(15,Math.min(world.h-15,player.y+dy*player.speed));
+ if(!blocked(nx,player.y))player.x=nx;
+ if(!blocked(player.x,ny))player.y=ny;
+
+ if(done<5&&Math.hypot(player.x-target.x,player.y-target.y)<42){
+  done++;coins+=100;
+  localStorage.setItem("zrCoins",coins);
+  localStorage.setItem("zrDone",done);
+  document.getElementById("coins").textContent=coins;
+  document.getElementById("done").textContent=done;
+  toast("MISSION COMPLETE! +100 COINS 🪙");
+  target=missions[done]||missions[4];
+ }
+ document.getElementById("task").textContent=done>=5?"All missions completed! Explore the city.":target.name;
+}
+function draw(){
+ update();
+ const camX=Math.max(0,Math.min(world.w-W,player.x-W/2));
+ const camY=Math.max(0,Math.min(world.h-H,player.y-H/2));
+ ctx.clearRect(0,0,W,H);
+ ctx.save();ctx.translate(-camX,-camY);
+ ctx.fillStyle="#253c39";ctx.fillRect(0,0,world.w,world.h);
+
+ // City roads
+ ctx.fillStyle="#26303b";
+ for(let x=0;x<world.w;x+=220)ctx.fillRect(x,0,48,world.h);
+ for(let y=0;y<world.h;y+=220)ctx.fillRect(0,y,world.w,48);
+ ctx.strokeStyle="#a4a28a";ctx.lineWidth=2;ctx.setLineDash([14,14]);
+ for(let x=24;x<world.w;x+=220){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,world.h);ctx.stroke()}
+ for(let y=24;y<world.h;y+=220){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(world.w,y);ctx.stroke()}
+ ctx.setLineDash([]);
+
+ // Parks and buildings
+ for(const b of buildings){
+  ctx.fillStyle="#111b25";ctx.fillRect(b.x+7,b.y+8,b.w,b.h);
+  ctx.fillStyle=b.c;ctx.fillRect(b.x,b.y,b.w,b.h);
+  ctx.fillStyle="#68d7db";
+  for(let wx=b.x+12;wx<b.x+b.w-8;wx+=22)
+   for(let wy=b.y+12;wy<b.y+b.h-8;wy+=24)ctx.fillRect(wx,wy,8,9);
+  ctx.fillStyle="#53636a";ctx.fillRect(b.x+b.w/2-8,b.y+b.h/2-8,16,16);
+ }
+ // Mission marker
+ if(done<5){
+  const pulse=10+Math.sin(Date.now()/180)*5;
+  ctx.beginPath();ctx.arc(target.x,target.y,pulse+12,0,Math.PI*2);
+  ctx.strokeStyle="#55f5ff";ctx.lineWidth=4;ctx.stroke();
+  ctx.beginPath();ctx.arc(target.x,target.y,12,0,Math.PI*2);
+  ctx.fillStyle="#55f5ff";ctx.fill();
+  ctx.fillStyle="white";ctx.font="bold 15px Arial";ctx.textAlign="center";
+  ctx.fillText("MISSION",target.x,target.y-30);
+ }
+ // Player
+ ctx.beginPath();ctx.arc(player.x,player.y,18,0,Math.PI*2);
+ ctx.fillStyle="#0008";ctx.fill();
+ ctx.beginPath();ctx.arc(player.x,player.y,12,0,Math.PI*2);
+ ctx.fillStyle="#ffcf70";ctx.fill();
+ ctx.fillStyle="#17243a";ctx.fillRect(player.x-6,player.y-3,12,8);
+ ctx.fillStyle="white";ctx.font="bold 12px Arial";ctx.textAlign="center";
+ ctx.fillText("YOU",player.x,player.y-24);
+ ctx.restore();
+
+ // Mini-map
+ const mw=94,mh=94,mx=W-mw-10,my=H-mh-12;
+ ctx.fillStyle="#07111ddd";ctx.fillRect(mx,my,mw,mh);
+ ctx.strokeStyle="#6bdff3";ctx.strokeRect(mx,my,mw,mh);
+ ctx.fillStyle="#52636a";
+ for(const b of buildings)ctx.fillRect(mx+b.x/world.w*mw,my+b.y/world.h*mh,4,4);
+ if(done<5){ctx.fillStyle="#55f5ff";ctx.beginPath();ctx.arc(mx+target.x/world.w*mw,my+target.y/world.h*mh,4,0,7);ctx.fill()}
+ ctx.fillStyle="#ffcf70";ctx.beginPath();ctx.arc(mx+player.x/world.w*mw,my+player.y/world.h*mh,3,0,7);ctx.fill();
+ requestAnimationFrame(draw);
+}
+toast("Welcome to ZORQUINT CITY!");
+draw();
 </script>
 </body>
 </html>
