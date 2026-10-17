@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NEONFLIX — Watch Movies</title>
+<title>NEONFLIX — Watch & Download</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -16,136 +16,142 @@ body{
 }
 
 nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  display:flex;justify-content:space-between;align-items:center;
-  padding:16px 24px;
-  background:linear-gradient(180deg,#05060cf2,#05060c00);
+  position:sticky;top:0;z-index:100;
+  background:#05060cf2;
   backdrop-filter:blur(10px);
+  padding:14px 20px;
+  border-bottom:1px solid #ffffff10;
 }
 
 .logo{
-  font-size:26px;font-weight:900;
+  font-size:24px;font-weight:900;
   color:#ff2e63;
-  text-shadow:0 0 18px #ff2e6388;
+  text-shadow:0 0 15px #ff2e6388;
 }
 
 .logo span{color:#00e5ff}
 
-.hero{
-  height:100dvh;
+/* CATEGORIES */
+.categories{
   display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:90px 20px 40px;
-  background:
-    radial-gradient(circle at 70% 25%,#3b1a5e,#05060c 70%);
+  gap:10px;
+  overflow-x:auto;
+  padding:14px 20px;
+  background:#070a12;
+  border-bottom:1px solid #ffffff10;
 }
 
-.badge{
-  background:#ff2e63;
-  padding:6px 16px;
+.categories::-webkit-scrollbar{display:none}
+
+.cat{
+  padding:9px 20px;
   border-radius:30px;
-  font-size:12px;font-weight:bold;
-  margin-bottom:18px;
+  background:#101a28;
+  border:1px solid #ffffff18;
+  font-size:14px;
+  font-weight:bold;
+  color:#c9d6e2;
+  cursor:pointer;
+  white-space:nowrap;
 }
 
-.hero h1{
-  font-size:clamp(36px,8vw,70px);
-  font-weight:900;
-  line-height:1.1;
-  text-shadow:0 0 30px #00e5ff55;
+.cat.active{
+  background:#00e5ff;
+  color:#021018;
+  border-color:#00e5ff;
 }
 
-.hero h1 span{color:#00e5ff}
-
-.hero p{
-  margin:18px 0 26px;
-  color:#b8c7d6;
-  font-size:15px;
-  max-width:520px;
-  line-height:1.7;
-}
-
-video{
-  width:100%;
-  max-width:900px;
-  border-radius:18px;
-  border:1px solid #ffffff22;
-  box-shadow:0 25px 60px #000000aa;
-  background:#000;
-}
-
-section{
-  padding:60px 6vw;
-}
-
-.section-head{
-  display:flex;justify-content:space-between;
-  align-items:center;margin-bottom:24px;
-}
-
-.section-head h2{font-size:24px}
-
-.section-head a{
-  color:#00e5ff;font-size:14px;text-decoration:none;
+/* VIDEO GRID */
+main{
+  padding:22px 16px 60px;
 }
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  gap:18px;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:14px;
 }
 
 .card{
   background:#0c1420;
-  border-radius:16px;
+  border-radius:14px;
   overflow:hidden;
   border:1px solid #ffffff12;
-  transition:.25s;
+  transition:.2s;
 }
 
 .card:hover{
-  transform:translateY(-8px);
+  transform:translateY(-5px);
   border-color:#00e5ff66;
 }
 
-.card video{
-  width:100%;
-  height:220px;
-  object-fit:cover;
-  border-radius:0;
-  border:none;
-  box-shadow:none;
+.thumb{
+  position:relative;
+  height:110px;
   background:#000;
 }
 
-.card-info{
-  padding:12px;
+.thumb video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
-.card-info h3{
-  font-size:15px;margin-bottom:5px;
+.playIcon{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:44px;height:44px;
+  background:#00e5ffcc;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  color:#021018;
+  pointer-events:none;
 }
 
-.card-info p{
-  font-size:12px;color:#8fa3b5;
+.info{
+  padding:10px;
+}
+
+.info h3{
+  font-size:13px;
+  margin-bottom:4px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.info p{
+  font-size:11px;
+  color:#8fa3b5;
+  margin-bottom:8px;
 }
 
 .rating{color:#ffd166;font-weight:bold}
 
+.download{
+  display:block;
+  width:100%;
+  padding:8px;
+  border:none;
+  border-radius:9px;
+  background:linear-gradient(90deg,#00e5ff,#7cffcb);
+  color:#021018;
+  font-size:12px;
+  font-weight:900;
+  text-decoration:none;
+  text-align:center;
+}
+
 footer{
-  padding:45px 6vw;
+  padding:35px 20px;
   background:#04050a;
   border-top:1px solid #ffffff10;
   text-align:center;
   color:#7d8fa0;
-  font-size:13px;
-  line-height:1.8;
+  font-size:12px;
 }
-
-footer b{color:#fff}
 </style>
 </head>
 
@@ -155,79 +161,122 @@ footer b{color:#fff}
   <div class="logo">NEON<span>FLIX</span></div>
 </nav>
 
-<!-- MAIN VIDEO -->
-<div class="hero">
-  <div class="badge">🔥 NOW PLAYING</div>
-
-  <h1>NEON<br><span>CITY</span> 2077</h1>
-
-  <p>
-    तुमचा खरा movie trailer / video खाली प्ले करा.
-  </p>
-
-  <video
-    controls
-    playsinline
-    poster=""
-    src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
-  ></video>
+<!-- CATEGORIES -->
+<div class="categories">
+  <div class="cat active">All</div>
+  <div class="cat">Marathi</div>
+  <div class="cat">Hindi</div>
+  <div class="cat">English</div>
 </div>
 
-<!-- MORE VIDEOS -->
-<section>
-  <div class="section-head">
-    <h2>🎬 More Videos</h2>
-    <a href="#">View All</a>
-  </div>
-
+<!-- VIDEO GRID -->
+<main>
   <div class="grid">
 
+    <!-- VIDEO 1 -->
     <div class="card">
-      <video
-        controls
-        playsinline
-        src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
-      ></video>
+      <div class="thumb">
+        <video
+          src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
+          muted
+          playsinline
+        ></video>
+        <div class="playIcon">▶</div>
+      </div>
 
-      <div class="card-info">
+      <div class="info">
         <h3>My First Video</h3>
-        <p><span class="rating">★ NEW</span> · Uploaded Video</p>
+        <p><span class="rating">★ NEW</span> · Marathi</p>
+        <a
+          class="download"
+          href="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
+          download
+        >
+          ⬇ Download
+        </a>
       </div>
     </div>
 
+    <!-- VIDEO 2 -->
     <div class="card">
-      <video
-        controls
-        playsinline
-        src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
-      ></video>
+      <div class="thumb">
+        <video
+          src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
+          muted
+          playsinline
+        ></video>
+        <div class="playIcon">▶</div>
+      </div>
 
-      <div class="card-info">
+      <div class="info">
         <h3>Neon City Trailer</h3>
-        <p><span class="rating">★ 8.9</span> · Sci-Fi</p>
+        <p><span class="rating">★ 8.9</span> · Hindi</p>
+        <a
+          class="download"
+          href="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
+          download
+        >
+          ⬇ Download
+        </a>
       </div>
     </div>
 
+    <!-- VIDEO 3 -->
     <div class="card">
-      <video
-        controls
-        playsinline
-        src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
-      ></video>
+      <div class="thumb">
+        <video
+          src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
+          muted
+          playsinline
+        ></video>
+        <div class="playIcon">▶</div>
+      </div>
 
-      <div class="card-info">
+      <div class="info">
         <h3>Action Clip</h3>
-        <p><span class="rating">★ 8.4</span> · Action</p>
+        <p><span class="rating">★ 8.4</span> · English</p>
+        <a
+          class="download"
+          href="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
+          download
+        >
+          ⬇ Download
+        </a>
       </div>
     </div>
 
   </div>
-</section>
+</main>
 
 <footer>
   <b>NEONFLIX</b><br>
-  Watch your uploaded videos online.
+  Watch and download videos.
 </footer>
+
+<script>
+const cats = document.querySelectorAll(".cat");
+const cards = document.querySelectorAll(".card");
+
+cats.forEach(cat => {
+  cat.addEventListener("click", () => {
+
+    cats.forEach(c => c.classList.remove("active"));
+    cat.classList.add("active");
+
+    const selected = cat.textContent.trim();
+
+    cards.forEach(card => {
+      const text = card.innerText;
+
+      if(selected === "All"){
+        card.style.display = "block";
+      }else{
+        card.style.display = text.includes(selected) ? "block" : "none";
+      }
+    });
+  });
+});
+</script>
 
 </body>
 </html>
