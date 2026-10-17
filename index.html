@@ -1,311 +1,634 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>ZORQUINT CITY RISE</title>
+
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{background:#07111e;color:white;font-family:Arial,sans-serif;touch-action:none}
-header{height:62px;background:#101c30;display:flex;justify-content:space-between;align-items:center;padding:8px 14px}
-.logo{font-size:20px;font-weight:900;color:#55e8ff}
-.sub{font-size:10px;color:#b8c8da;margin-top:4px}
-.stats{text-align:right;font-size:14px;line-height:1.7}
-#stage{position:relative}
-canvas{display:block;width:100%;height:calc(100dvh - 180px);touch-action:none}
-#mission{position:absolute;top:10px;left:9px;background:#091629ee;border:1px solid #466783;border-radius:11px;padding:10px 12px;font-size:13px;line-height:1.55;pointer-events:none}
-#mission b{color:#55e8ff}
-#toast{position:absolute;top:110px;left:50%;transform:translateX(-50%);padding:10px 12px;background:#071525;border:1px solid #55e8ff;border-radius:10px;display:none;font-size:13px;white-space:nowrap;z-index:4}
-#controls{height:118px;background:#0a1423;display:flex;justify-content:space-around;align-items:center;gap:5px;padding:6px}
-#pad{display:grid;grid-template-columns:repeat(3,60px);grid-template-rows:repeat(2,46px);gap:5px}
-button{color:white;font-weight:bold;border:2px solid #547895;background:linear-gradient(#203c58,#12263c);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
-.dir{width:60px;height:46px;border-radius:12px;font-size:27px;box-shadow:0 3px 0 #07101b}
-.dir.active, .dir:active{background:#087f9d;border-color:#7aeaff;transform:scale(.96)}
-.blank{visibility:hidden}
-#dash{width:65px;height:65px;border-radius:50%;background:linear-gradient(#7751ae,#382565);border-color:#b39aff;font-size:13px}
-#info{width:82px;height:64px;border-radius:13px;background:linear-gradient(#087e99,#07516b);font-size:13px;line-height:1.4}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #07111e;
+  color: white;
+  font-family: Arial, sans-serif;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+header {
+  height: 60px;
+  background: #101c30;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 900;
+  color: #55e8ff;
+}
+
+.sub {
+  font-size: 10px;
+  color: #b8c8da;
+  margin-top: 3px;
+}
+
+.stats {
+  text-align: right;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#stage {
+  position: relative;
+  height: calc(100dvh - 190px);
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+#mission {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #091629ee;
+  border: 1px solid #466783;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  pointer-events: none;
+  max-width: 70%;
+}
+
+#mission b {
+  color: #55e8ff;
+}
+
+#toast {
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  background: #071525;
+  border: 1px solid #55e8ff;
+  border-radius: 10px;
+  display: none;
+  font-size: 13px;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+#controls {
+  height: 130px;
+  background: #0a1423;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+}
+
+#pad {
+  display: grid;
+  grid-template-columns: repeat(3, 74px);
+  grid-template-rows: repeat(2, 58px);
+  gap: 6px;
+}
+
+button {
+  color: white;
+  font-weight: bold;
+  border: 2px solid #547895;
+  background: linear-gradient(#203c58, #12263c);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.dir {
+  width: 74px;
+  height: 58px;
+  border-radius: 14px;
+  font-size: 32px;
+  box-shadow: 0 4px 0 #07101b;
+}
+
+.dir.active,
+.dir:active {
+  background: #087f9d;
+  border-color: #7aeaff;
+  transform: scale(0.95);
+}
+
+.blank {
+  visibility: hidden;
+}
+
+#dash {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: linear-gradient(#7751ae, #382565);
+  border-color: #b39aff;
+  font-size: 14px;
+}
+
+#info {
+  width: 88px;
+  height: 70px;
+  border-radius: 14px;
+  background: linear-gradient(#087e99, #07516b);
+  font-size: 13px;
+  line-height: 1.4;
+}
 </style>
 </head>
+
 <body>
+
 <header>
- <div><div class="logo">ZORQUINT</div><div class="sub">CITY RISE · OPEN WORLD</div></div>
- <div class="stats">🪙 <span id="coins">0</span><br>MISSION <span id="count">0</span>/5</div>
+  <div>
+    <div class="logo">ZORQUINT</div>
+    <div class="sub">CITY RISE · OPEN WORLD</div>
+  </div>
+
+  <div class="stats">
+    🪙 <span id="coins">0</span><br>
+    MISSION <span id="count">0</span>/5
+  </div>
 </header>
 
 <div id="stage">
- <canvas id="game"></canvas>
- <div id="mission"><b>🎯 CITY MISSION</b><br><span id="task">Reach Central Station</span><br>Use the large arrows below.</div>
- <div id="toast"></div>
+  <canvas id="game"></canvas>
+
+  <div id="mission">
+    <b>🎯 CITY MISSION</b><br>
+    <span id="task">Reach Central Station</span><br>
+    Use the large arrows below.
+  </div>
+
+  <div id="toast"></div>
 </div>
 
 <div id="controls">
- <div id="pad">
-  <button class="dir blank">.</button>
-  <button class="dir" data-dir="up">▲</button>
-  <button class="dir blank">.</button>
-  <button class="dir" data-dir="left">◀</button>
-  <button class="dir" data-dir="down">▼</button>
-  <button class="dir" data-dir="right">▶</button>
- </div>
- <button id="dash">⚡<br>DASH</button>
- <button id="info">MISSION<br>INFO</button>
+  <div id="pad">
+    <button class="dir blank">.</button>
+    <button class="dir" data-dir="up">▲</button>
+    <button class="dir blank">.</button>
+
+    <button class="dir" data-dir="left">◀</button>
+    <button class="dir" data-dir="down">▼</button>
+    <button class="dir" data-dir="right">▶</button>
+  </div>
+
+  <button id="dash">⚡<br>DASH</button>
+  <button id="info">MISSION<br>INFO</button>
 </div>
 
 <script>
-(()=>{
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
-const WORLD=2400,STEP=200,ROAD=58;
-let W=innerWidth,H=innerHeight-180,DPR=1;
+(() => {
 
-function resize(){
- const r=canvas.getBoundingClientRect();
- W=r.width;H=r.height;
- DPR=Math.min(window.devicePixelRatio||1,2);
- canvas.width=Math.round(W*DPR);
- canvas.height=Math.round(H*DPR);
- ctx.setTransform(DPR,0,0,DPR,0,0);
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const WORLD = 2400;
+const STEP = 200;
+const ROAD = 58;
+
+let W = 0;
+let H = 0;
+let DPR = 1;
+
+function resize() {
+  const rect = canvas.getBoundingClientRect();
+
+  W = rect.width;
+  H = rect.height;
+
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+  canvas.width = Math.round(W * DPR);
+  canvas.height = Math.round(H * DPR);
+
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
-window.addEventListener("resize",resize);
+
+window.addEventListener("resize", resize);
 resize();
 
-const player={x:ROAD/2+STEP*5,y:ROAD/2+STEP*5,r:10,speed:3.6};
-const held={up:false,down:false,left:false,right:false};
-let dashFrames=0;
-
-let coins=Number(localStorage.getItem("zqrCoins")||0);
-let done=Math.max(0,Math.min(5,Number(localStorage.getItem("zqrMissions")||0)));
-
-const missions=[
- {x:ROAD/2+STEP*5,y:ROAD/2+STEP*4,name:"Reach Central Station"},
- {x:ROAD/2+STEP*6,y:ROAD/2+STEP*5,name:"Visit Neon Market"},
- {x:ROAD/2+STEP*5,y:ROAD/2+STEP*6,name:"Explore Riverside"},
- {x:ROAD/2+STEP*4,y:ROAD/2+STEP*5,name:"Find Old Town"},
- {x:ROAD/2+STEP*3,y:ROAD/2+STEP*3,name:"Complete City Tour"}
-];
-let target=missions[Math.min(done,4)];
-
-const buildings=[],parks=[];
-for(let row=0;row<12;row++){
- for(let col=0;col<12;col++){
-  const x=col*STEP+ROAD+10;
-  const y=row*STEP+ROAD+10;
-  if((row*7+col*3)%8===0){
-   parks.push({x,y,w:STEP-ROAD-20,h:STEP-ROAD-20});
-  }else{
-   buildings.push({
-    x,y,w:STEP-ROAD-20,h:STEP-ROAD-20,
-    color:["#30465e","#3b455a","#31504d","#41415b"][(row+col)%4]
-   });
-  }
- }
-}
-
-function toast(message){
- const el=document.getElementById("toast");
- el.textContent=message;
- el.style.display="block";
- clearTimeout(toast.timer);
- toast.timer=setTimeout(()=>el.style.display="none",2000);
-}
-function updateLabels(){
- document.getElementById("coins").textContent=coins;
- document.getElementById("count").textContent=done;
- document.getElementById("task").textContent=
-  done>=5?"All missions complete! Explore freely.":target.name;
-}
-document.getElementById("info").addEventListener("click",()=>{
- toast(done>=5?"🏆 CITY TOUR COMPLETE!":target.name);
-});
-document.getElementById("dash").addEventListener("pointerdown",e=>{
- e.preventDefault();
- dashFrames=35;
- toast("⚡ DASH!");
-});
-
-// Mobile controls: press to move, release to stop.
-document.querySelectorAll("[data-dir]").forEach(button=>{
- const direction=button.dataset.dir;
- button.addEventListener("pointerdown",e=>{
-  e.preventDefault();
-  held[direction]=true;
-  button.classList.add("active");
- });
-});
-function releaseControls(){
- for(const direction in held)held[direction]=false;
- document.querySelectorAll("[data-dir]").forEach(b=>b.classList.remove("active"));
-}
-window.addEventListener("pointerup",releaseControls);
-window.addEventListener("pointercancel",releaseControls);
-window.addEventListener("blur",releaseControls);
-
-// Keyboard controls also work on a computer.
-const keyMap={
- ArrowUp:"up",w:"up",ArrowDown:"down",s:"down",
- ArrowLeft:"left",a:"left",ArrowRight:"right",d:"right"
+const player = {
+  x: ROAD / 2 + STEP * 5,
+  y: ROAD / 2 + STEP * 5,
+  r: 10,
+  speed: 3.6
 };
-window.addEventListener("keydown",e=>{
- const direction=keyMap[e.key];
- if(direction){held[direction]=true;e.preventDefault();}
-});
-window.addEventListener("keyup",e=>{
- const direction=keyMap[e.key];
- if(direction)held[direction]=false;
-});
 
-function collision(x,y){
- for(const b of buildings){
-  if(x+player.r>b.x&&x-player.r<b.x+b.w&&
-     y+player.r>b.y&&y-player.r<b.y+b.h)return true;
- }
- return false;
-}
+const held = {
+  up: false,
+  down: false,
+  left: false,
+  right: false
+};
 
-function update(){
- let dx=(held.right?1:0)-(held.left?1:0);
- let dy=(held.down?1:0)-(held.up?1:0);
- if(dx&&dy){dx*=0.707;dy*=0.707;}
+let dashFrames = 0;
 
- const speed=player.speed+(dashFrames>0?3:0);
- if(dashFrames>0)dashFrames--;
+let coins = Number(localStorage.getItem("zqrCoins") || 0);
+let done = Math.max(0, Math.min(5, Number(localStorage.getItem("zqrMissions") || 0)));
 
- const nx=Math.max(player.r,Math.min(WORLD-player.r,player.x+dx*speed));
- const ny=Math.max(player.r,Math.min(WORLD-player.r,player.y+dy*speed));
+const missions = [
+  { x: ROAD / 2 + STEP * 5, y: ROAD / 2 + STEP * 4, name: "Reach Central Station" },
+  { x: ROAD / 2 + STEP * 6, y: ROAD / 2 + STEP * 5, name: "Visit Neon Market" },
+  { x: ROAD / 2 + STEP * 5, y: ROAD / 2 + STEP * 6, name: "Explore Riverside" },
+  { x: ROAD / 2 + STEP * 4, y: ROAD / 2 + STEP * 5, name: "Find Old Town" },
+  { x: ROAD / 2 + STEP * 3, y: ROAD / 2 + STEP * 3, name: "Complete City Tour" }
+];
 
- if(!collision(nx,player.y))player.x=nx;
- if(!collision(player.x,ny))player.y=ny;
+let target = missions[Math.min(done, 4)];
 
- if(done<5&&Math.hypot(player.x-target.x,player.y-target.y)<35){
-  done++;
-  coins+=100;
-  localStorage.setItem("zqrCoins",coins);
-  localStorage.setItem("zqrMissions",done);
-  target=missions[Math.min(done,4)];
-  updateLabels();
-  toast("MISSION COMPLETE! +100 COINS 🪙");
- }
-}
+const buildings = [];
+const parks = [];
 
-function draw(){
- update();
- const camX=Math.max(0,Math.min(WORLD-W,player.x-W/2));
- const camY=Math.max(0,Math.min(WORLD-H,player.y-H/2));
+for (let row = 0; row < 12; row++) {
+  for (let col = 0; col < 12; col++) {
 
- ctx.clearRect(0,0,W,H);
- ctx.save();
- ctx.translate(-camX,-camY);
+    const x = col * STEP + ROAD + 10;
+    const y = row * STEP + ROAD + 10;
 
- // City ground and roads
- ctx.fillStyle="#263640";
- ctx.fillRect(0,0,WORLD,WORLD);
- ctx.fillStyle="#303a46";
- for(let p=0;p<WORLD;p+=STEP){
-  ctx.fillRect(p,0,ROAD,WORLD);
-  ctx.fillRect(0,p,WORLD,ROAD);
- }
- ctx.strokeStyle="#b6b39b";
- ctx.lineWidth=2;
- ctx.setLineDash([13,15]);
- for(let p=ROAD/2;p<WORLD;p+=STEP){
-  ctx.beginPath();ctx.moveTo(p,0);ctx.lineTo(p,WORLD);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(0,p);ctx.lineTo(WORLD,p);ctx.stroke();
- }
- ctx.setLineDash([]);
-
- // Parks
- for(const p of parks){
-  ctx.fillStyle="#20463b";
-  ctx.fillRect(p.x,p.y,p.w,p.h);
-  for(let i=0;i<4;i++){
-   const tx=p.x+22+i*28;
-   const ty=p.y+25+(i%2)*35;
-   ctx.fillStyle="#448153";
-   ctx.beginPath();ctx.arc(tx,ty,9,0,Math.PI*2);ctx.fill();
-   ctx.fillStyle="#8b704e";
-   ctx.fillRect(tx-2,ty,4,10);
+    if ((row * 7 + col * 3) % 8 === 0) {
+      parks.push({
+        x: x,
+        y: y,
+        w: STEP - ROAD - 20,
+        h: STEP - ROAD - 20
+      });
+    } else {
+      buildings.push({
+        x: x,
+        y: y,
+        w: STEP - ROAD - 20,
+        h: STEP - ROAD - 20,
+        color: ["#30465e", "#3b455a", "#31504d", "#41415b"][(row + col) % 4]
+      });
+    }
   }
- }
-
- // Buildings and windows
- for(const b of buildings){
-  ctx.fillStyle="#101923";
-  ctx.fillRect(b.x+7,b.y+8,b.w,b.h);
-  ctx.fillStyle=b.color;
-  ctx.fillRect(b.x,b.y,b.w,b.h);
-  ctx.fillStyle="#63dce5";
-  for(let x=b.x+10;x<b.x+b.w-6;x+=20){
-   for(let y=b.y+10;y<b.y+b.h-6;y+=22){
-    ctx.fillRect(x,y,8,9);
-   }
-  }
- }
-
- // Mission beacon
- if(done<5){
-  const pulse=15+Math.sin(Date.now()/170)*5;
-  ctx.beginPath();
-  ctx.arc(target.x,target.y,pulse+7,0,Math.PI*2);
-  ctx.strokeStyle="#55f4ff";
-  ctx.lineWidth=4;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(target.x,target.y,9,0,Math.PI*2);
-  ctx.fillStyle="#55f4ff";
-  ctx.fill();
-  ctx.fillStyle="white";
-  ctx.font="bold 13px Arial";
-  ctx.textAlign="center";
-  ctx.fillText("MISSION",target.x,target.y-29);
- }
-
- // Player
- ctx.fillStyle="#0008";
- ctx.beginPath();
- ctx.ellipse(player.x,player.y+7,13,7,0,0,Math.PI*2);
- ctx.fill();
- ctx.fillStyle="#ffc76b";
- ctx.beginPath();
- ctx.arc(player.x,player.y,10,0,Math.PI*2);
- ctx.fill();
- ctx.fillStyle="#17283c";
- ctx.fillRect(player.x-5,player.y-3,10,6);
- ctx.fillStyle="white";
- ctx.font="bold 12px Arial";
- ctx.textAlign="center";
- ctx.fillText("YOU",player.x,player.y-19);
-
- ctx.restore();
-
- // Mini-map
- const mw=84,mh=84,mx=W-mw-9,my=H-mh-9;
- ctx.fillStyle="#06111eee";
- ctx.fillRect(mx,my,mw,mh);
- ctx.strokeStyle="#55e8ff";
- ctx.strokeRect(mx,my,mw,mh);
- ctx.fillStyle="#526979";
- for(const b of buildings){
-  ctx.fillRect(mx+b.x/WORLD*mw,my+b.y/WORLD*mh,3,3);
- }
- if(done<5){
-  ctx.fillStyle="#55f4ff";
-  ctx.beginPath();
-  ctx.arc(mx+target.x/WORLD*mw,my+target.y/WORLD*mh,3,0,Math.PI*2);
-  ctx.fill();
- }
- ctx.fillStyle="#ffc76b";
- ctx.beginPath();
- ctx.arc(mx+player.x/WORLD*mw,my+player.y/WORLD*mh,3,0,Math.PI*2);
- ctx.fill();
-
- requestAnimationFrame(draw);
 }
+
+function toast(message) {
+  const el = document.getElementById("toast");
+  el.textContent = message;
+  el.style.display = "block";
+
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => {
+    el.style.display = "none";
+  }, 2000);
+}
+
+function updateLabels() {
+  document.getElementById("coins").textContent = coins;
+  document.getElementById("count").textContent = done;
+
+  document.getElementById("task").textContent =
+    done >= 5
+      ? "All missions complete! Explore freely."
+      : target.name;
+}
+
+document.getElementById("info").addEventListener("click", () => {
+  toast(done >= 5 ? "🏆 CITY TOUR COMPLETE!" : target.name);
+});
+
+document.getElementById("dash").addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  dashFrames = 35;
+  toast("⚡ DASH!");
+});
+
+const directionButtons = document.querySelectorAll("[data-dir]");
+
+directionButtons.forEach((button) => {
+
+  const direction = button.dataset.dir;
+
+  button.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    held[direction] = true;
+    button.classList.add("active");
+  });
+
+  function stop() {
+    held[direction] = false;
+    button.classList.remove("active");
+  }
+
+  button.addEventListener("pointerup", stop);
+  button.addEventListener("pointercancel", stop);
+  button.addEventListener("pointerleave", stop);
+});
+
+window.addEventListener("pointerup", releaseAll);
+window.addEventListener("pointercancel", releaseAll);
+window.addEventListener("blur", releaseAll);
+
+function releaseAll() {
+  held.up = false;
+  held.down = false;
+  held.left = false;
+  held.right = false;
+
+  directionButtons.forEach((button) => {
+    button.classList.remove("active");
+  });
+}
+
+document.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+});
+
+const keyMap = {
+  ArrowUp: "up",
+  w: "up",
+  ArrowDown: "down",
+  s: "down",
+  ArrowLeft: "left",
+  a: "left",
+  ArrowRight: "right",
+  d: "right"
+};
+
+window.addEventListener("keydown", (e) => {
+  const direction = keyMap[e.key];
+
+  if (direction) {
+    held[direction] = true;
+    e.preventDefault();
+  }
+});
+
+window.addEventListener("keyup", (e) => {
+  const direction = keyMap[e.key];
+
+  if (direction) {
+    held[direction] = false;
+  }
+});
+
+function collision(x, y) {
+  for (const b of buildings) {
+    if (
+      x + player.r > b.x &&
+      x - player.r < b.x + b.w &&
+      y + player.r > b.y &&
+      y - player.r < b.y + b.h
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function update() {
+  let dx = (held.right ? 1 : 0) - (held.left ? 1 : 0);
+  let dy = (held.down ? 1 : 0) - (held.up ? 1 : 0);
+
+  if (dx && dy) {
+    dx *= 0.707;
+    dy *= 0.707;
+  }
+
+  const speed = player.speed + (dashFrames > 0 ? 3 : 0);
+
+  if (dashFrames > 0) {
+    dashFrames--;
+  }
+
+  const nx = Math.max(
+    player.r,
+    Math.min(WORLD - player.r, player.x + dx * speed)
+  );
+
+  const ny = Math.max(
+    player.r,
+    Math.min(WORLD - player.r, player.y + dy * speed)
+  );
+
+  if (!collision(nx, player.y)) {
+    player.x = nx;
+  }
+
+  if (!collision(player.x, ny)) {
+    player.y = ny;
+  }
+
+  if (done < 5) {
+    const distance = Math.hypot(
+      player.x - target.x,
+      player.y - target.y
+    );
+
+    if (distance < 35) {
+      done++;
+      coins += 100;
+
+      localStorage.setItem("zqrCoins", coins);
+      localStorage.setItem("zqrMissions", done);
+
+      target = missions[Math.min(done, 4)];
+
+      updateLabels();
+      toast("MISSION COMPLETE! +100 COINS 🪙");
+    }
+  }
+}
+
+function draw() {
+  update();
+
+  const camX = Math.max(0, Math.min(WORLD - W, player.x - W / 2));
+  const camY = Math.max(0, Math.min(WORLD - H, player.y - H / 2));
+
+  ctx.clearRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.translate(-camX, -camY);
+
+  ctx.fillStyle = "#263640";
+  ctx.fillRect(0, 0, WORLD, WORLD);
+
+  ctx.fillStyle = "#303a46";
+
+  for (let p = 0; p < WORLD; p += STEP) {
+    ctx.fillRect(p, 0, ROAD, WORLD);
+    ctx.fillRect(0, p, WORLD, ROAD);
+  }
+
+  ctx.strokeStyle = "#b6b39b";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([13, 15]);
+
+  for (let p = ROAD / 2; p < WORLD; p += STEP) {
+    ctx.beginPath();
+    ctx.moveTo(p, 0);
+    ctx.lineTo(p, WORLD);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(0, p);
+    ctx.lineTo(WORLD, p);
+    ctx.stroke();
+  }
+
+  ctx.setLineDash([]);
+
+  for (const p of parks) {
+    ctx.fillStyle = "#20463b";
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+
+    for (let i = 0; i < 4; i++) {
+      const tx = p.x + 22 + i * 28;
+      const ty = p.y + 25 + (i % 2) * 35;
+
+      ctx.fillStyle = "#448153";
+      ctx.beginPath();
+      ctx.arc(tx, ty, 9, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#8b704e";
+      ctx.fillRect(tx - 2, ty, 4, 10);
+    }
+  }
+
+  for (const b of buildings) {
+    ctx.fillStyle = "#101923";
+    ctx.fillRect(b.x + 7, b.y + 8, b.w, b.h);
+
+    ctx.fillStyle = b.color;
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+
+    ctx.fillStyle = "#63dce5";
+
+    for (let x = b.x + 10; x < b.x + b.w - 6; x += 20) {
+      for (let y = b.y + 10; y < b.y + b.h - 6; y += 22) {
+        ctx.fillRect(x, y, 8, 9);
+      }
+    }
+  }
+
+  if (done < 5) {
+    const pulse = 15 + Math.sin(Date.now() / 170) * 5;
+
+    ctx.beginPath();
+    ctx.arc(target.x, target.y, pulse + 7, 0, Math.PI * 2);
+    ctx.strokeStyle = "#55f4ff";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(target.x, target.y, 9, 0, Math.PI * 2);
+    ctx.fillStyle = "#55f4ff";
+    ctx.fill();
+
+    ctx.fillStyle = "white";
+    ctx.font = "bold 13px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("MISSION", target.x, target.y - 29);
+  }
+
+  ctx.fillStyle = "#0008";
+  ctx.beginPath();
+  ctx.ellipse(player.x, player.y + 7, 13, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#ffc76b";
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, 10, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#17283c";
+  ctx.fillRect(player.x - 5, player.y - 3, 10, 6);
+
+  ctx.fillStyle = "white";
+  ctx.font = "bold 12px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("YOU", player.x, player.y - 19);
+
+  ctx.restore();
+
+  const mw = 84;
+  const mh = 84;
+  const mx = W - mw - 9;
+  const my = H - mh - 9;
+
+  ctx.fillStyle = "#06111eee";
+  ctx.fillRect(mx, my, mw, mh);
+
+  ctx.strokeStyle = "#55e8ff";
+  ctx.strokeRect(mx, my, mw, mh);
+
+  ctx.fillStyle = "#526979";
+
+  for (const b of buildings) {
+    ctx.fillRect(
+      mx + b.x / WORLD * mw,
+      my + b.y / WORLD * mh,
+      3,
+      3
+    );
+  }
+
+  if (done < 5) {
+    ctx.fillStyle = "#55f4ff";
+    ctx.beginPath();
+    ctx.arc(
+      mx + target.x / WORLD * mw,
+      my + target.y / WORLD * mh,
+      3,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+  }
+
+  ctx.fillStyle = "#ffc76b";
+  ctx.beginPath();
+  ctx.arc(
+    mx + player.x / WORLD * mw,
+    my + player.y / WORLD * mh,
+    3,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
+
+  requestAnimationFrame(draw);
+}
+
 updateLabels();
 toast("WELCOME TO ZORQUINT CITY!");
 draw();
+
 })();
 </script>
+
 </body>
 </html>
