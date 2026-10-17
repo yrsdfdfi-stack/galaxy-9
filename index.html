@@ -24,38 +24,22 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
   font-weight:bold;text-shadow:0 0 10px #00e5ff;
 }
 
-#score{color:#00e5ff;font-size:22px}
+#score{color:#00e5ff;font-size:20px}
 #best{color:#ffd166;font-size:15px;text-align:right}
 
 #speedBox{
-  position:fixed;top:64px;left:16px;z-index:10;
-  background:#04121ecc;
-  border:1px solid #1d4a68;
-  border-radius:14px;
-  padding:10px 14px;
+  position:fixed;top:62px;left:14px;z-index:10;
+  background:#04121ecc;border:1px solid #1d4a68;
+  border-radius:16px;padding:10px 14px;
 }
 
 #speedText{
-  font-size:26px;font-weight:900;color:#7ff4ff;
+  font-size:28px;font-weight:900;color:#7ff4ff;
   text-shadow:0 0 14px #00e5ff;
 }
 
-#speedLabel{
-  font-size:11px;color:#9db4c9;margin-top:3px;
-}
-
-#boostBar{
-  width:150px;height:10px;
-  background:#0b2233;
-  border-radius:20px;
-  margin-top:8px;
-  overflow:hidden;
-}
-
-#boostFill{
-  height:100%;
-  width:100%;
-  background:linear-gradient(90deg,#ffd166,#ff7ad9);
+#fuelText{
+  margin-top:6px;font-size:16px;font-weight:bold;color:#ffd166;
 }
 
 #start{
@@ -67,7 +51,7 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 }
 
 #start h1{
-  font-size:42px;margin:0;color:#00e5ff;
+  font-size:40px;margin:0;color:#00e5ff;
   text-shadow:0 0 25px #00e5ff,0 0 60px #0077ff;
 }
 
@@ -77,7 +61,7 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 }
 
 #play{
-  margin-top:26px;padding:16px 44px;
+  margin-top:24px;padding:16px 44px;
   font-size:20px;font-weight:900;color:#021018;
   background:linear-gradient(90deg,#00e5ff,#7cffcb);
   border:none;border-radius:40px;
@@ -86,18 +70,18 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 
 #controls{
   position:fixed;bottom:0;left:0;right:0;
-  height:210px;display:flex;
+  height:230px;display:flex;
   justify-content:space-evenly;align-items:center;
-  z-index:20;padding-bottom:24px;
-  background:linear-gradient(180deg,transparent,#01050bcc);
+  z-index:20;padding-bottom:26px;
+  background:linear-gradient(180deg,transparent,#01050bd9);
 }
 
 .cbtn{
-  width:150px;height:150px;border-radius:50%;
-  font-size:62px;font-weight:bold;color:#fff;
+  width:160px;height:160px;border-radius:50%;
+  font-size:66px;font-weight:bold;color:#fff;
   background:linear-gradient(180deg,#123a5c,#081c2f);
-  border:3px solid #2f6d94;
-  box-shadow:0 0 30px #00e5ff55;
+  border:4px solid #2f6d94;
+  box-shadow:0 0 35px #00e5ff55;
   touch-action:none;user-select:none;
   -webkit-user-select:none;
 }
@@ -105,15 +89,15 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 .cbtn:active{
   background:linear-gradient(180deg,#0a9dbf,#066b85);
   border-color:#7ff4ff;
-  transform:scale(0.95);
+  transform:scale(0.94);
 }
 
 #boost{
-  width:170px;height:170px;
-  font-size:24px;line-height:1.2;
+  width:185px;height:185px;
+  font-size:26px;line-height:1.2;
   background:linear-gradient(180deg,#7b52c4,#3b2270);
   border-color:#c9a4ff;
-  box-shadow:0 0 35px #7b52c477;
+  box-shadow:0 0 40px #7b52c477;
 }
 
 #boost:active{
@@ -132,17 +116,15 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 
 <div id="speedBox">
   <div id="speedText">0 KM/H</div>
-  <div id="speedLabel">CURRENT SPEED</div>
-  <div id="boostBar"><div id="boostFill"></div></div>
+  <div id="fuelText">⛽ BOOST FUEL: 0</div>
 </div>
 
 <div id="start">
   <h1>NEON DRIFT 3D</h1>
   <p>
-    रस्त्यावर अडथळे नाहीत.<br>
-    गाडी सुरुवातीला हळू चालेल,<br>
-    नंतर हळूहळू अधिक वेगवान होईल.<br>
-    BOOST दाबून जास्त स्पीड काढा!
+    रस्त्यावर ⛽ फ्यूल बॉटल घे.<br>
+    जेवढी बॉटल घेशील तेवढ्या वेळा BOOST वापरू शकशील.<br>
+    BOOST दाबल्यावर गाडीच्या मागून आग निघेल!
   </p>
   <button id="play">START ENGINE</button>
 </div>
@@ -180,18 +162,21 @@ let playing = false;
 let playerX = 0;
 let speed = 0;
 let distance = 0;
+let fuel = 0;
 let bestSpeed = Number(localStorage.getItem("neonBestSpeed") || 0);
 
+let fuels = [];
 let stars = [];
 let lines = [];
+let flames = [];
 
-const normalMaxSpeed = 18;
-const boostMaxSpeed = 34;
+const normalMaxSpeed = 16;
+const boostMaxSpeed = 32;
 
-let boostPower = 100;
 let boosting = false;
+let boostTime = 0;
 
-for(let i=0;i<100;i++){
+for(let i=0;i<110;i++){
   stars.push({
     x: Math.random(),
     y: Math.random() * 0.55,
@@ -199,8 +184,8 @@ for(let i=0;i<100;i++){
   });
 }
 
-for(let i=0;i<45;i++){
-  lines.push(i / 45);
+for(let i=0;i<50;i++){
+  lines.push(i / 50);
 }
 
 /* ---------- SOUND ---------- */
@@ -217,11 +202,11 @@ function startAudio(){
 
   engineOsc = audioCtx.createOscillator();
   engineOsc.type = "sawtooth";
-  engineOsc.frequency.value = 45;
+  engineOsc.frequency.value = 42;
 
   engineFilter = audioCtx.createBiquadFilter();
   engineFilter.type = "lowpass";
-  engineFilter.frequency.value = 600;
+  engineFilter.frequency.value = 650;
 
   engineGain = audioCtx.createGain();
   engineGain.gain.value = 0.0001;
@@ -236,8 +221,8 @@ function startAudio(){
 function updateEngineSound(){
   if(!audioCtx || !playing) return;
 
-  const freq = 42 + speed * 7;
-  const volume = 0.02 + (speed / boostMaxSpeed) * 0.08;
+  const freq = 40 + speed * 7;
+  const volume = 0.02 + (speed / boostMaxSpeed) * 0.085;
 
   engineOsc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
   engineGain.gain.setTargetAtTime(volume, audioCtx.currentTime, 0.12);
@@ -246,6 +231,46 @@ function updateEngineSound(){
 function stopEngineSound(){
   if(!audioCtx || !engineGain) return;
   engineGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.1);
+}
+
+function boostSound(){
+  if(!audioCtx) return;
+
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(700, audioCtx.currentTime + 0.35);
+
+  gain.gain.setValueAtTime(0.22, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.45);
+}
+
+function fuelSound(){
+  if(!audioCtx) return;
+
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(700, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.12);
+
+  gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.18);
 }
 
 /* ---------- GAME ---------- */
@@ -260,15 +285,28 @@ function startGame(){
   playerX = 0;
   speed = 0;
   distance = 0;
-  boostPower = 100;
+  fuel = 0;
+  fuels = [];
+  flames = [];
   boosting = false;
+  boostTime = 0;
   playing = true;
+
+  addFuel(1600);
+  addFuel(2600);
 
   document.getElementById("start").style.display = "none";
   document.getElementById("controls").style.display = "flex";
 }
 
 document.getElementById("play").addEventListener("click", startGame);
+
+function addFuel(z){
+  fuels.push({
+    z: z,
+    lane: Math.floor(Math.random() * 3) - 1
+  });
+}
 
 let leftPressed = false;
 let rightPressed = false;
@@ -286,85 +324,120 @@ document.getElementById("right").addEventListener("pointerdown", e => {
 document.getElementById("boost").addEventListener("pointerdown", e => {
   e.preventDefault();
 
-  if(boostPower > 5){
+  if(fuel > 0 && boostTime <= 0){
+    fuel--;
+    boostTime = 150;
     boosting = true;
+    boostSound();
   }
 });
 
 addEventListener("pointerup", () => {
   leftPressed = false;
   rightPressed = false;
-  boosting = false;
 });
 
 addEventListener("pointercancel", () => {
   leftPressed = false;
   rightPressed = false;
-  boosting = false;
 });
 
 addEventListener("keydown", e => {
   if(e.key === "ArrowLeft" || e.key === "a") leftPressed = true;
   if(e.key === "ArrowRight" || e.key === "d") rightPressed = true;
-  if(e.key === " ") boosting = true;
+  if(e.key === " " && fuel > 0 && boostTime <= 0){
+    fuel--;
+    boostTime = 150;
+    boosting = true;
+    boostSound();
+  }
 });
 
 addEventListener("keyup", e => {
   if(e.key === "ArrowLeft" || e.key === "a") leftPressed = false;
   if(e.key === "ArrowRight" || e.key === "d") rightPressed = false;
-  if(e.key === " ") boosting = false;
 });
 
 document.addEventListener("contextmenu", e => e.preventDefault());
 
 function getAcceleration(){
-  // सुरुवातीला अतिशय हळू, नंतर हळूहळू जास्त
-  if(speed < 4) return 0.008;
-  if(speed < 8) return 0.016;
-  if(speed < 12) return 0.028;
-  if(speed < 16) return 0.042;
-  return 0.055;
+  if(speed < 3) return 0.006;
+  if(speed < 6) return 0.012;
+  if(speed < 9) return 0.022;
+  if(speed < 12) return 0.034;
+  return 0.045;
+}
+
+function getFuelGap(){
+  if(distance < 2000) return 2200;
+  if(distance < 5000) return 1700;
+  if(distance < 10000) return 1300;
+  return 1000;
 }
 
 function update(){
   if(!playing) return;
 
-  let maxSpeed = boosting ? boostMaxSpeed : normalMaxSpeed;
+  if(boostTime > 0){
+    boostTime--;
+    boosting = true;
+    speed += 0.18;
 
-  if(boosting && boostPower > 0){
-    speed += 0.16;
-    boostPower -= 0.45;
-
-    if(boostPower <= 0){
-      boostPower = 0;
+    if(boostTime <= 0){
       boosting = false;
     }
   }else{
     speed += getAcceleration();
 
     if(speed > normalMaxSpeed){
-      speed -= 0.06;
-    }
-
-    if(boostPower < 100){
-      boostPower += 0.12;
+      speed -= 0.05;
     }
   }
 
-  if(speed > maxSpeed){
-    speed = maxSpeed;
+  if(speed > boostMaxSpeed){
+    speed = boostMaxSpeed;
   }
 
   distance += speed;
-  playerX += (rightPressed ? 7 : 0) - (leftPressed ? 7 : 0);
 
-  if(playerX < -300) playerX = -300;
-  if(playerX > 300) playerX = 300;
+  playerX += (rightPressed ? 8 : 0) - (leftPressed ? 8 : 0);
+
+  if(playerX < -360) playerX = -360;
+  if(playerX > 360) playerX = 360;
 
   if(speed > bestSpeed){
     bestSpeed = speed;
     localStorage.setItem("neonBestSpeed", Math.floor(bestSpeed * 14));
   }
+
+  fuels.forEach(f => {
+    f.z -= speed * 9;
+
+    if(f.z < 130){
+      if(Math.abs(f.lane * 320 - playerX) < 130){
+        fuel++;
+        fuelSound();
+        f.z = getFuelGap() + Math.random() * 800;
+        f.lane = Math.floor(Math.random() * 3) - 1;
+      }
+    }
+
+    if(f.z < 60){
+      f.z = getFuelGap() + Math.random() * 800;
+      f.lane = Math.floor(Math.random() * 3) - 1;
+    }
+  });
+
+  if(boosting){
+    flames.push({
+      x: playerX,
+      life: 16,
+      size: 18 + Math.random() * 14
+    });
+  }
+
+  flames.forEach(f => f.life--);
+  flames = flames.filter(f => f.life > 0);
 
   updateEngineSound();
 
@@ -377,7 +450,8 @@ function update(){
   document.getElementById("speedText").textContent =
     Math.floor(speed * 14) + " KM/H";
 
-  document.getElementById("boostFill").style.width = boostPower + "%";
+  document.getElementById("fuelText").textContent =
+    "⛽ BOOST FUEL: " + fuel;
 }
 
 function drawBackground(){
@@ -397,42 +471,43 @@ function drawBackground(){
 
   ctx.globalAlpha = 1;
 
-  const sunY = H * 0.52;
-  const sun = ctx.createLinearGradient(0,sunY-120,0,sunY+120);
+  const sunY = H * 0.5;
+  const sun = ctx.createLinearGradient(0,sunY-130,0,sunY+130);
   sun.addColorStop(0,"#ff2e88");
   sun.addColorStop(1,"#7b2eff");
 
   ctx.fillStyle = sun;
   ctx.beginPath();
-  ctx.arc(W/2,sunY,110,0,Math.PI*2);
+  ctx.arc(W/2,sunY,120,0,Math.PI*2);
   ctx.fill();
 
   ctx.fillStyle = "#02040a";
 
-  for(let i=0;i<8;i++){
-    ctx.fillRect(W/2-120,sunY-100+i*22,240,7);
+  for(let i=0;i<9;i++){
+    ctx.fillRect(W/2-130,sunY-105+i*23,260,7);
   }
 }
 
 function drawRoad(){
-  const horizon = H * 0.55;
+  const horizon = H * 0.52;
+  const roadBottomWidth = Math.min(W * 1.15, 1250);
 
   ctx.fillStyle = "#05070d";
   ctx.fillRect(0,horizon,W,H-horizon);
 
   ctx.strokeStyle = "#00e5ff";
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 5;
   ctx.shadowColor = "#00e5ff";
-  ctx.shadowBlur = 20;
+  ctx.shadowBlur = 25;
 
   ctx.beginPath();
-  ctx.moveTo(W/2-70,horizon);
-  ctx.lineTo(W/2-620,H);
+  ctx.moveTo(W/2-60,horizon);
+  ctx.lineTo(W/2-roadBottomWidth/2,H);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(W/2+70,horizon);
-  ctx.lineTo(W/2+620,H);
+  ctx.moveTo(W/2+60,horizon);
+  ctx.lineTo(W/2+roadBottomWidth/2,H);
   ctx.stroke();
 
   ctx.shadowBlur = 0;
@@ -440,14 +515,14 @@ function drawRoad(){
   ctx.fillStyle = "#f7e58a";
 
   lines.forEach(l => {
-    let z = ((l * 2000 + distance * 8) % 2000);
-    let scale = 700 / z;
-    let y = horizon + (H - horizon) * scale * 0.8;
+    let z = ((l * 2200 + distance * 8) % 2200);
+    let scale = 750 / z;
+    let y = horizon + (H - horizon) * scale * 0.85;
 
     if(y < horizon || y > H) return;
 
-    let w = 8 * scale;
-    let h = 60 * scale;
+    let w = 10 * scale;
+    let h = 70 * scale;
 
     ctx.globalAlpha = Math.min(1,scale);
     ctx.fillRect(W/2 - w/2, y, w, h);
@@ -456,61 +531,124 @@ function drawRoad(){
   ctx.globalAlpha = 1;
 
   if(boosting){
-    ctx.fillStyle = "rgba(255,122,217,0.18)";
+    ctx.fillStyle = "rgba(255,122,217,0.16)";
     ctx.fillRect(0,horizon,W,H-horizon);
   }
 }
 
+function drawFuels(){
+  const horizon = H * 0.52;
+
+  fuels
+    .slice()
+    .sort((a,b) => b.z - a.z)
+    .forEach(f => {
+
+      if(f.z < 90) return;
+
+      let scale = 750 / f.z;
+      let y = horizon + (H - horizon) * scale * 0.85;
+      let x = W/2 + f.lane * 320 * scale;
+      let size = 75 * scale;
+
+      if(y > H || size < 5) return;
+
+      ctx.shadowColor = "#ffd166";
+      ctx.shadowBlur = 30;
+
+      ctx.fillStyle = "#ffd166";
+      ctx.fillRect(x - size/2, y - size, size, size * 1.2);
+
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = "#5b3a00";
+      ctx.fillRect(x - size*0.12, y - size - size*0.25, size*0.24, size*0.3);
+
+      ctx.fillStyle = "#3b2a00";
+      ctx.font = "bold " + Math.max(8, size*0.5) + "px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("⛽", x, y - size*0.25);
+    });
+}
+
+function drawFlames(){
+  const carY = H - 210;
+
+  flames.forEach(f => {
+    const alpha = f.life / 16;
+    const size = f.size * alpha;
+
+    ctx.globalAlpha = alpha;
+
+    ctx.fillStyle = "#ff2e88";
+    ctx.shadowColor = "#ff2e88";
+    ctx.shadowBlur = 30;
+
+    ctx.beginPath();
+    ctx.arc(W/2 + f.x - 28, carY + 65, size, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(W/2 + f.x + 28, carY + 65, size, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(W/2 + f.x - 28, carY + 65, size * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(W/2 + f.x + 28, carY + 65, size * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+  });
+}
+
 function drawPlayer(){
   const x = W/2 + playerX;
-  const y = H - 170;
+  const y = H - 210;
+
+  drawFlames();
 
   ctx.fillStyle = "rgba(0,0,0,0.6)";
   ctx.beginPath();
-  ctx.ellipse(x,y+55,70,16,0,0,Math.PI*2);
+  ctx.ellipse(x,y+60,80,18,0,0,Math.PI*2);
   ctx.fill();
 
   ctx.fillStyle = boosting ? "#ff7ad9" : "#00e5ff";
   ctx.shadowColor = boosting ? "#ff7ad9" : "#00e5ff";
-  ctx.shadowBlur = 40;
+  ctx.shadowBlur = 45;
 
   ctx.beginPath();
-  ctx.moveTo(x-70,y+40);
-  ctx.lineTo(x-45,y-15);
-  ctx.lineTo(x+45,y-15);
-  ctx.lineTo(x+70,y+40);
+  ctx.moveTo(x-85,y+45);
+  ctx.lineTo(x-55,y-20);
+  ctx.lineTo(x+55,y-20);
+  ctx.lineTo(x+85,y+45);
   ctx.closePath();
   ctx.fill();
 
   ctx.shadowBlur = 0;
 
   ctx.fillStyle = "#04121c";
-  ctx.fillRect(x-42,y-8,84,26);
+  ctx.fillRect(x-50,y-10,100,32);
 
   ctx.fillStyle = "#7ff4ff";
-  ctx.fillRect(x-30,y-4,60,14);
+  ctx.fillRect(x-36,y-5,72,18);
 
   ctx.fillStyle = "#fff8c9";
   ctx.shadowColor = "#fff8c9";
-  ctx.shadowBlur = 25;
+  ctx.shadowBlur = 30;
 
-  ctx.fillRect(x-58,y+22,18,9);
-  ctx.fillRect(x+40,y+22,18,9);
+  ctx.fillRect(x-70,y+26,22,11);
+  ctx.fillRect(x+48,y+26,22,11);
 
   ctx.shadowBlur = 0;
 
-  ctx.fillStyle = boosting ? "#ffd166" : "#ff2e88";
-  ctx.fillRect(x-62,y+38,20,7);
-  ctx.fillRect(x+42,y+38,20,7);
-
-  if(boosting){
-    ctx.fillStyle = "#ff7ad9";
-    ctx.shadowColor = "#ff7ad9";
-    ctx.shadowBlur = 30;
-
-    ctx.fillRect(x-25,y+48,50,18);
-    ctx.shadowBlur = 0;
-  }
+  ctx.fillStyle = "#ff2e88";
+  ctx.fillRect(x-75,y+44,24,8);
+  ctx.fillRect(x+51,y+44,24,8);
 }
 
 function draw(){
@@ -518,6 +656,7 @@ function draw(){
 
   drawBackground();
   drawRoad();
+  drawFuels();
   drawPlayer();
 
   requestAnimationFrame(draw);
