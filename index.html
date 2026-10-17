@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NEONFLIX — Movies & Web Series</title>
+<title>NEONFLIX — Watch Movies</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -15,7 +15,6 @@ body{
   overflow-x:hidden;
 }
 
-/* NAVBAR */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;justify-content:space-between;align-items:center;
@@ -25,105 +24,74 @@ nav{
 }
 
 .logo{
-  font-size:26px;font-weight:900;letter-spacing:1px;
+  font-size:26px;font-weight:900;
   color:#ff2e63;
   text-shadow:0 0 18px #ff2e6388;
 }
 
 .logo span{color:#00e5ff}
 
-.menu{
-  display:flex;gap:22px;font-size:14px;font-weight:bold;
-}
-
-.menu a{
-  color:#c9d6e2;text-decoration:none;transition:.2s;
-}
-
-.menu a:hover{color:#00e5ff}
-
-/* HERO */
 .hero{
   height:100dvh;
-  position:relative;
-  display:flex;align-items:flex-end;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:90px 20px 40px;
   background:
-    linear-gradient(90deg,#05060c 20%,#05060c00 70%),
-    radial-gradient(circle at 75% 30%,#3b1a5e,#05060c 70%);
-}
-
-.hero-content{
-  padding:0 6vw 90px;
-  max-width:720px;
+    radial-gradient(circle at 70% 25%,#3b1a5e,#05060c 70%);
 }
 
 .badge{
-  display:inline-block;
   background:#ff2e63;
-  padding:6px 14px;
+  padding:6px 16px;
   border-radius:30px;
   font-size:12px;font-weight:bold;
   margin-bottom:18px;
 }
 
 .hero h1{
-  font-size:clamp(38px,8vw,84px);
-  line-height:1;
+  font-size:clamp(36px,8vw,70px);
   font-weight:900;
-  text-shadow:0 0 35px #00e5ff55;
+  line-height:1.1;
+  text-shadow:0 0 30px #00e5ff55;
 }
 
 .hero h1 span{color:#00e5ff}
 
 .hero p{
-  margin:20px 0 28px;
+  margin:18px 0 26px;
   color:#b8c7d6;
-  font-size:16px;
-  line-height:1.7;
+  font-size:15px;
   max-width:520px;
+  line-height:1.7;
 }
 
-.buttons{display:flex;gap:14px;flex-wrap:wrap}
-
-.btn{
-  padding:14px 30px;border:none;border-radius:40px;
-  font-size:15px;font-weight:900;cursor:pointer;
-  transition:.2s;
+video{
+  width:100%;
+  max-width:900px;
+  border-radius:18px;
+  border:1px solid #ffffff22;
+  box-shadow:0 25px 60px #000000aa;
+  background:#000;
 }
 
-.btn-primary{
-  background:linear-gradient(90deg,#00e5ff,#7cffcb);
-  color:#021018;
-  box-shadow:0 0 25px #00e5ff66;
-}
-
-.btn-secondary{
-  background:#ffffff14;
-  color:#fff;
-  border:1px solid #ffffff33;
-}
-
-.btn:hover{transform:scale(1.05)}
-
-/* SECTIONS */
 section{
-  padding:70px 6vw;
+  padding:60px 6vw;
 }
 
 .section-head{
   display:flex;justify-content:space-between;
-  align-items:center;margin-bottom:26px;
+  align-items:center;margin-bottom:24px;
 }
 
-.section-head h2{
-  font-size:26px;
-}
+.section-head h2{font-size:24px}
 
 .section-head a{
   color:#00e5ff;font-size:14px;text-decoration:none;
 }
 
-/* MOVIE GRID */
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
@@ -136,19 +104,21 @@ section{
   overflow:hidden;
   border:1px solid #ffffff12;
   transition:.25s;
-  cursor:pointer;
 }
 
 .card:hover{
   transform:translateY(-8px);
   border-color:#00e5ff66;
-  box-shadow:0 20px 40px #00000088;
 }
 
-.poster{
-  height:240px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:44px;
+.card video{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  border-radius:0;
+  border:none;
+  box-shadow:none;
+  background:#000;
 }
 
 .card-info{
@@ -163,34 +133,10 @@ section{
   font-size:12px;color:#8fa3b5;
 }
 
-.rating{
-  color:#ffd166;font-weight:bold;
-}
+.rating{color:#ffd166;font-weight:bold}
 
-/* CATEGORIES */
-.tags{
-  display:flex;gap:12px;flex-wrap:wrap;
-}
-
-.tag{
-  padding:10px 20px;
-  border-radius:30px;
-  background:#101a28;
-  border:1px solid #ffffff18;
-  font-size:14px;
-  cursor:pointer;
-  transition:.2s;
-}
-
-.tag:hover{
-  background:#00e5ff;
-  color:#021018;
-  border-color:#00e5ff;
-}
-
-/* FOOTER */
 footer{
-  padding:50px 6vw;
+  padding:45px 6vw;
   background:#04050a;
   border-top:1px solid #ffffff10;
   text-align:center;
@@ -200,11 +146,6 @@ footer{
 }
 
 footer b{color:#fff}
-
-@media(max-width:700px){
-  .menu{display:none}
-  .hero-content{padding-bottom:60px}
-}
 </style>
 </head>
 
@@ -212,147 +153,80 @@ footer b{color:#fff}
 
 <nav>
   <div class="logo">NEON<span>FLIX</span></div>
-  <div class="menu">
-    <a href="#">Home</a>
-    <a href="#">Movies</a>
-    <a href="#">Web Series</a>
-    <a href="#">Anime</a>
-    <a href="#">My List</a>
-  </div>
 </nav>
 
-<!-- HERO -->
+<!-- MAIN VIDEO -->
 <div class="hero">
-  <div class="hero-content">
-    <div class="badge">🔥 NEW RELEASE</div>
-    <h1>NEON<br><span>CITY</span> 2077</h1>
-    <p>
-      भविष्यातील निओन सिटीमध्ये एक हॅकर, एक सैनिक आणि एक गूढ AI
-      एकत्र येतात—शहर वाचवण्यासाठी. Action, sci-fi आणि thriller चा
-      जबरदस्त combination.
-    </p>
+  <div class="badge">🔥 NOW PLAYING</div>
 
-    <div class="buttons">
-      <button class="btn btn-primary">▶ Watch Now</button>
-      <button class="btn btn-secondary">+ My List</button>
-    </div>
-  </div>
+  <h1>NEON<br><span>CITY</span> 2077</h1>
+
+  <p>
+    तुमचा खरा movie trailer / video खाली प्ले करा.
+  </p>
+
+  <video
+    controls
+    playsinline
+    poster=""
+    src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
+  ></video>
 </div>
 
-<!-- TRENDING -->
+<!-- MORE VIDEOS -->
 <section>
   <div class="section-head">
-    <h2>🔥 Trending Now</h2>
+    <h2>🎬 More Videos</h2>
     <a href="#">View All</a>
   </div>
 
   <div class="grid">
+
     <div class="card">
-      <div class="poster" style="background:linear-gradient(135deg,#3b1a5e,#ff2e63)">🎬</div>
+      <video
+        controls
+        playsinline
+        src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
+      ></video>
+
       <div class="card-info">
-        <h3>Neon City 2077</h3>
-        <p><span class="rating">★ 8.9</span> · Sci-Fi · 2026</p>
+        <h3>My First Video</h3>
+        <p><span class="rating">★ NEW</span> · Uploaded Video</p>
       </div>
     </div>
 
     <div class="card">
-      <div class="poster" style="background:linear-gradient(135deg,#003049,#00e5ff)">🚀</div>
+      <video
+        controls
+        playsinline
+        src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
+      ></video>
+
       <div class="card-info">
-        <h3>Space Runner</h3>
-        <p><span class="rating">★ 8.4</span> · Adventure · 2026</p>
+        <h3>Neon City Trailer</h3>
+        <p><span class="rating">★ 8.9</span> · Sci-Fi</p>
       </div>
     </div>
 
     <div class="card">
-      <div class="poster" style="background:linear-gradient(135deg,#1b4332,#95d5b2)">🗡️</div>
+      <video
+        controls
+        playsinline
+        src="https://raw.githubusercontent.com/yrsdfdfi-stack/galaxy-9/main/VID_20261003_185033_544.mp4"
+      ></video>
+
       <div class="card-info">
-        <h3>Last Samurai</h3>
-        <p><span class="rating">★ 9.1</span> · Action · 2025</p>
+        <h3>Action Clip</h3>
+        <p><span class="rating">★ 8.4</span> · Action</p>
       </div>
     </div>
 
-    <div class="card">
-      <div class="poster" style="background:linear-gradient(135deg,#5a189a,#e0aaff)">👻</div>
-      <div class="card-info">
-        <h3>Dark House</h3>
-        <p><span class="rating">★ 7.8</span> · Horror · 2026</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="poster" style="background:linear-gradient(135deg,#7f5539,#ffd166)">🏎️</div>
-      <div class="card-info">
-        <h3>Road Kings</h3>
-        <p><span class="rating">★ 8.2</span> · Racing · 2026</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="poster" style="background:linear-gradient(135deg,#00296b,#69b5ff)">🤖</div>
-      <div class="card-info">
-        <h3>AI Revolution</h3>
-        <p><span class="rating">★ 8.7</span> · Thriller · 2026</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CATEGORIES -->
-<section>
-  <div class="section-head">
-    <h2>🎯 Browse Categories</h2>
-  </div>
-
-  <div class="tags">
-    <div class="tag">Action</div>
-    <div class="tag">Sci-Fi</div>
-    <div class="tag">Horror</div>
-    <div class="tag">Comedy</div>
-    <div class="tag">Romance</div>
-    <div class="tag">Anime</div>
-    <div class="tag">Thriller</div>
-    <div class="tag">Documentary</div>
-  </div>
-</section>
-
-<!-- WEB SERIES -->
-<section>
-  <div class="section-head">
-    <h2>📺 Popular Web Series</h2>
-    <a href="#">View All</a>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <div class="poster" style="background:linear-gradient(135deg,#22223b,#9a8c98)">🏙️</div>
-      <div class="card-info">
-        <h3>Mumbai Nights</h3>
-        <p><span class="rating">★ 8.8</span> · Crime · Season 2</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="poster" style="background:linear-gradient(135deg,#0b3954,#087e8b)">🕵️</div>
-      <div class="card-info">
-        <h3>Code Name X</h3>
-        <p><span class="rating">★ 8.5</span> · Spy · Season 1</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="poster" style="background:linear-gradient(135deg,#4a1942,#ff758f)">💃</div>
-      <div class="card-info">
-        <h3>Dance Empire</h3>
-        <p><span class="rating">★ 7.9</span> · Drama · Season 3</p>
-      </div>
-    </div>
   </div>
 </section>
 
 <footer>
   <b>NEONFLIX</b><br>
-  Movies · Web Series · Anime · Trailers<br>
-  Made for demo purpose.
+  Watch your uploaded videos online.
 </footer>
 
 </body>
