@@ -115,9 +115,9 @@ canvas{display:block;width:100vw;height:100dvh;touch-action:none}
 <div id="start">
   <h1>NEON DRIFT 3D</h1>
   <p>
-    रात्रीच्या निओन हायवेवर गाडी चालवा.<br>
-    रहदारीला टाळा, स्पीड वाढवा,<br>
-    आणि जास्तीत जास्त score करा.
+    सुरुवातीला गाडी हळू चालेल.<br>
+    नंतर स्पीड वाढेल आणि रहदारीही जास्त होईल.<br>
+    टक्कर टाळून जास्त score करा!
   </p>
   <button id="play">START RACE</button>
 </div>
@@ -167,7 +167,7 @@ let obstacles = [];
 let stars = [];
 let lines = [];
 
-const maxSpeed = 24;
+const maxSpeed = 26;
 
 for(let i=0;i<90;i++){
   stars.push({
@@ -181,7 +181,7 @@ for(let i=0;i<40;i++){
   lines.push(i / 40);
 }
 
-/* ---------- SOUND SYSTEM ---------- */
+/* ---------- SOUND ---------- */
 
 let audioCtx = null;
 let engineOsc = null;
@@ -195,7 +195,7 @@ function startAudio(){
 
   engineOsc = audioCtx.createOscillator();
   engineOsc.type = "sawtooth";
-  engineOsc.frequency.value = 60;
+  engineOsc.frequency.value = 50;
 
   engineFilter = audioCtx.createBiquadFilter();
   engineFilter.type = "lowpass";
@@ -214,11 +214,11 @@ function startAudio(){
 function updateEngineSound(){
   if(!audioCtx || !playing) return;
 
-  const freq = 55 + speed * 9;
-  const volume = 0.03 + speed / maxSpeed * 0.07;
+  const freq = 45 + speed * 8;
+  const volume = 0.025 + (speed / maxSpeed) * 0.07;
 
-  engineOsc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.08);
-  engineGain.gain.setTargetAtTime(volume, audioCtx.currentTime, 0.1);
+  engineOsc.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
+  engineGain.gain.setTargetAtTime(volume, audioCtx.currentTime, 0.12);
 }
 
 function stopEngineSound(){
@@ -250,7 +250,6 @@ function crashSound(){
   noise.connect(filter);
   filter.connect(gain);
   gain.connect(audioCtx.destination);
-
   noise.start();
 
   const boom = audioCtx.createOscillator();
@@ -279,9 +278,9 @@ function reset(){
   score = 0;
   obstacles = [];
 
-  for(let i=0;i<5;i++){
-    addObstacle(600 + i * 500);
-  }
+  // सुरुवातीला फक्त 2 अडथळे
+  addObstacle(1400);
+  addObstacle(2200);
 }
 
 function addObstacle(z){
@@ -362,10 +361,27 @@ addEventListener("keyup", e => {
 
 document.addEventListener("contextmenu", e => e.preventDefault());
 
+function getAcceleration(){
+  // सुरुवातीला खूप हळू, नंतर जास्त वेगाने वाढणार
+  if(speed < 6) return 0.018;
+  if(speed < 12) return 0.035;
+  if(speed < 18) return 0.055;
+  return 0.075;
+}
+
+function getObstacleGap(){
+  // सुरुवातीला अडथळे दूर, नंतर जवळ येतील
+  if(score < 100) return 2200;
+  if(score < 250) return 1700;
+  if(score < 500) return 1300;
+  if(score < 900) return 1000;
+  return 800;
+}
+
 function update(){
   if(!playing) return;
 
-  speed += 0.045;
+  speed += getAcceleration();
   if(speed > maxSpeed) speed = maxSpeed;
 
   distance += speed;
@@ -387,7 +403,7 @@ function update(){
         crash();
       }
 
-      o.z = 2600 + Math.random() * 1200;
+      o.z = getObstacleGap() + Math.random() * 500;
       o.lane = Math.floor(Math.random() * 3) - 1;
     }
   });
