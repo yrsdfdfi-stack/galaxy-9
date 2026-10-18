@@ -1,1 +1,119 @@
 
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZORQUINT AI Image Generator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090e18;color:#fff;font-family:Arial,sans-serif;padding:18px}
+main{max-width:650px;margin:auto}
+header{text-align:center;padding:18px 0}
+h1{color:#5de7ff;font-size:30px;margin:8px}
+p{color:#c5d1e2;line-height:1.6}
+.card{background:#151e2e;border:1px solid #293b53;border-radius:18px;padding:18px;margin:14px 0}
+label{display:block;margin:14px 0 8px;font-weight:bold}
+input,textarea,button{width:100%;padding:14px;border-radius:11px;font-size:16px}
+input,textarea{background:#0b1321;color:white;border:1px solid #40536e}
+textarea{min-height:120px;resize:vertical}
+button{border:0;background:#12c9e8;color:#07111a;font-weight:bold;margin-top:12px;cursor:pointer}
+button:disabled{opacity:.55}
+.secondary{background:#263750;color:#fff}
+#preview{width:100%;border-radius:12px;margin-top:14px}
+#status{overflow-wrap:anywhere}
+footer{text-align:center;color:#8998ae;font-size:12px;margin:24px 0}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div style="font-size:42px">✦</div>
+<h1>ZORQUINT AI</h1>
+<p>तुझ्या कल्पनेतून गेमसाठी इमेज तयार कर</p>
+</header>
+
+<section class="card">
+<label for="prompt">इमेज कशी पाहिजे? (Prompt)</label>
+<textarea id="prompt" placeholder="उदा. Realistic Indian city at night, 3D open world game, cinematic lighting"></textarea>
+
+<label for="token">AI सेवा Token</label>
+<input id="token" type="password" autocomplete="off" placeholder="Hugging Face token इथे टाक">
+
+<button id="generate">✦ GENERATE IMAGE</button>
+<p id="status">Prompt लिहून Generate बटण दाब.</p>
+</section>
+
+<section class="card">
+<h2>तुझी तयार इमेज</h2>
+<div id="empty" style="text-align:center;padding:30px 5px;color:#8da1bb">
+<div style="font-size:52px">▧</div>
+इमेज तयार झाल्यावर इथे दिसेल
+</div>
+<img id="preview" alt="AI ने तयार केलेली इमेज" hidden>
+<button id="download" class="secondary" hidden>⬇ DOWNLOAD IMAGE</button>
+</section>
+
+<footer>ZORQUINT AI • Image Creator</footer>
+</main>
+
+<script type="module">
+import { InferenceClient } from "https://esm.sh/@huggingface/inference";
+
+const prompt = document.getElementById("prompt");
+const token = document.getElementById("token");
+const generate = document.getElementById("generate");
+const status = document.getElementById("status");
+const preview = document.getElementById("preview");
+const download = document.getElementById("download");
+const empty = document.getElementById("empty");
+
+let currentUrl = "";
+
+generate.addEventListener("click", async () => {
+  const text = prompt.value.trim();
+  const key = token.value.trim();
+
+  if (!text || !key) {
+    status.textContent = "Prompt आणि Token दोन्ही भरा.";
+    return;
+  }
+
+  generate.disabled = true;
+  status.textContent = "इमेज तयार होत आहे. थोडा वेळ थांब...";
+  download.hidden = true;
+
+  try {
+    const client = new InferenceClient(key);
+    const blob = await client.textToImage({
+      model: "black-forest-labs/FLUX.1-schnell",
+      inputs: text + ", detailed high quality game artwork",
+      provider: "auto"
+    });
+
+    if (currentUrl) URL.revokeObjectURL(currentUrl);
+    currentUrl = URL.createObjectURL(blob);
+    preview.src = currentUrl;
+    preview.hidden = false;
+    empty.hidden = true;
+    download.hidden = false;
+    status.textContent = "इमेज तयार झाली!";
+  } catch (error) {
+    console.error(error);
+    status.textContent = "इमेज तयार झाली नाही. Token, मॉडेलची उपलब्धता किंवा मोफत क्रेडिट तपासा.";
+  } finally {
+    generate.disabled = false;
+  }
+});
+
+download.addEventListener("click", () => {
+  if (!currentUrl) return;
+  const a = document.createElement("a");
+  a.href = currentUrl;
+  a.download = "zorquint-ai-image.png";
+  a.click();
+});
+</script>
+</body>
+</html>
+
